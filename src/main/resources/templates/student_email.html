@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Recovery - EngCenter x Gmail</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/engcenter-design.css}">
+    <style>
+        :root {
+            --gmail-sidebar: #f6f8fc;
+            --gmail-active: #d3e3fd;
+            --ec-blue: #1a73e8;
+            --ec-primary: #4F46E5;
+        }
+        body {
+            background-color: #f1f3f4;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+        }
+        .gmail-header {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #fff;
+            gap: 16px;
+        }
+        .main-container {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 256px;
+            background: var(--gmail-sidebar);
+            padding: 8px;
+            flex-shrink: 0;
+        }
+        .compose-btn {
+            background: #c2e7ff;
+            border: none;
+            padding: 18px 24px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            margin-bottom: 16px;
+            width: fit-content;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0 12px 0 24px;
+            border-radius: 0 20px 20px 0;
+            cursor: pointer;
+            color: #444746;
+            height: 32px;
+            margin-bottom: 2px;
+            font-size: 14px;
+        }
+        .nav-item i { margin-right: 18px; font-size: 16px; }
+        .nav-item.active { background: var(--gmail-active); color: #001d35; font-weight: 500; }
+
+        /* === MAIN LAYOUT: Email list LEFT + Form RIGHT === */
+        .content-area {
+            flex-grow: 1;
+            background: #fff;
+            margin: 8px 8px 8px 0;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: row;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+            overflow: hidden;
+        }
+
+        /* Left: Email content (shows OTP) */
+        .email-view-panel {
+            flex: 1;
+            padding: 36px;
+            overflow-y: auto;
+            border-right: 1px solid #e9edf5;
+        }
+
+        .email-from {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .email-avatar {
+            width: 40px; height: 40px; background: #4285f4; color: #fff;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 18px; flex-shrink: 0;
+        }
+        .email-subject {
+            font-size: 22px;
+            font-weight: 400;
+            color: #202124;
+            margin-bottom: 20px;
+        }
+        .email-body-card {
+            max-width: 480px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 32px;
+            text-align: center;
+        }
+        .google-logo { height: 24px; margin-bottom: 10px; }
+        .otp-display {
+            background: #f8f9fa;
+            border: 2px dashed #dadce0;
+            padding: 18px 30px;
+            font-size: 40px;
+            letter-spacing: 10px;
+            color: #d93025;
+            font-weight: bold;
+            border-radius: 8px;
+            margin: 20px auto;
+            display: inline-block;
+            min-width: 220px;
+            font-family: monospace;
+        }
+
+        /* Right: Action form panel */
+        .action-panel {
+            width: 380px;
+            flex-shrink: 0;
+            padding: 36px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-left: 1px solid #e9edf5;
+        }
+
+        .action-panel h4 {
+            font-weight: 700;
+            color: #202124;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        .action-panel p.desc {
+            font-size: 13px;
+            color: #5f6368;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(79,70,229,0.08);
+            color: var(--ec-primary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .otp-input {
+            font-size: 28px;
+            letter-spacing: 12px;
+            height: 70px;
+            text-align: center;
+            font-weight: bold;
+            border: 2px solid var(--ec-blue);
+            border-radius: 10px;
+        }
+        .otp-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(26,115,232,.2); border-color: var(--ec-blue); }
+
+        .btn-google {
+            background: var(--ec-blue);
+            color: #fff; border: none; padding: 13px 20px;
+            border-radius: 6px; font-weight: 600; width: 100%; margin-top: 16px;
+            font-size: 15px; transition: all .3s; cursor: pointer;
+        }
+        .btn-google:hover { background: #1558d6; color:#fff; }
+
+        .btn-success-update {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff; border: none; padding: 13px 20px;
+            border-radius: 6px; font-weight: 600; width: 100%; margin-top: 10px;
+            font-size: 15px; transition: all .3s; cursor: pointer;
+        }
+        .btn-success-update:hover { opacity: .9; color:#fff; }
+
+        .form-field {
+            margin-bottom: 16px;
+        }
+        .form-field label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; display: block; }
+        .form-field input {
+            width: 100%; border: 1.5px solid #dadce0; border-radius: 6px;
+            padding: 11px 14px; font-size: 14px; transition: all .3s;
+        }
+        .form-field input:focus { border-color: var(--ec-blue); outline: none; box-shadow: 0 0 0 3px rgba(26,115,232,.15); }
+
+        .success-badge {
+            display: flex; align-items: center; gap: 8px;
+            background: #f0fdf4; border: 1px solid #86efac;
+            border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;
+            color: #166534; font-weight: 600; font-size: 13px;
+        }
+
+        .divider { border-top: 1px solid #f1f5f9; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+    <div class="gmail-header">
+        <i class="fa fa-bars" style="color: #5f6368; cursor: pointer; font-size: 18px;"></i>
+        <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r5.png" alt="Gmail" style="height: 24px;">
+        <div style="flex-grow:1; background:#f1f3f4; border-radius:24px; padding:10px 20px; display:flex; align-items:center; gap:10px; max-width:600px;">
+            <i class="fa fa-search" style="color:#5f6368;"></i>
+            <input type="text" placeholder="Tìm kiếm trong thư" style="border:none; background:transparent; width:100%; outline:none;">
+        </div>
+        <div style="display:flex; align-items:center; gap:14px; margin-left:auto;">
+            <i class="fa fa-question-circle-o" style="color:#5f6368; font-size:18px;"></i>
+            <i class="fa fa-cog" style="color:#5f6368; font-size:18px;"></i>
+            <div style="width:34px;height:34px;background:#34a853;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;" th:text="${#strings.substring(userName != null ? userName : 'U', 0, 1).toUpperCase()}">U</div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <button class="compose-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#EA4335" d="M21 13h-8v8h-2v-8H3v-2h8V3h2v8h8v2z"></path></svg>
+                <span style="margin-left: 12px;">Soạn thư</span>
+            </button>
+            <div class="nav-item active"><i class="fa fa-inbox"></i> Hộp thư đến <span style="margin-left:auto;">(1)</span></div>
+            <div class="nav-item"><i class="fa fa-star-o"></i> Có gắn dấu sao</div>
+            <div class="nav-item"><i class="fa fa-paper-plane-o"></i> Đã gửi</div>
+            <div class="nav-item"><i class="fa fa-file-text-o"></i> Bản nháp</div>
+        </div>
+
+        <div class="content-area">
+
+            <!-- LEFT: Email nội dung + OTP hiển thị -->
+            <div class="email-view-panel">
+                <div class="email-subject">[EngCenter] Mã xác minh tài khoản học viên</div>
+
+                <div class="email-from">
+                    <div class="email-avatar">E</div>
+                    <div>
+                        <div style="font-weight:600; font-size:14px; color:#202124;">EngCenter Support &lt;no-reply@engcenter.edu.vn&gt;</div>
+                        <div style="font-size:12px; color:#5f6368;">Gửi đến <span th:text="${userName}">học viên</span></div>
+                    </div>
+                </div>
+
+                <div class="email-body-card">
+                    <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" class="google-logo" alt="Google">
+                    <p style="color:#6b7280; font-size:13px; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">EngCenter Student Support</p>
+
+                    <h2 style="font-size:22px; font-weight:400; color:#202124; margin:12px 0;">
+                        <strong th:text="${userName}">Học viên</strong>, mã xác minh của bạn
+                    </h2>
+
+                    <p style="color:#5f6368; font-size:14px; line-height:1.6; margin-bottom:16px;">
+                        Chào mừng bạn đến với hệ thống EngCenter. Vui lòng sao chép mã OTP bên dưới và dán vào ô nhập liệu ở bên phải để xác thực.
+                    </p>
+
+                    <!-- OTP HIỂN THỊ RÕ RÀNG -->
+                    <div th:if="${otp != null}">
+                        <p style="font-size:13px; color:#5f6368; margin-bottom:8px;">Mã OTP của bạn là:</p>
+                        <div class="otp-display" th:text="${otp}">------</div>
+                        <p style="font-size:11px; color:#9aa0a6; margin-top:12px;">Mã có hiệu lực trong 5 phút. Không chia sẻ mã này.</p>
+                    </div>
+                    <div th:if="${otp == null}" style="padding:20px; background:#fff3cd; border-radius:8px;">
+                        <i class="fa fa-exclamation-triangle" style="color:#d97706;"></i>
+                        <p style="color:#92400e; margin:8px 0 0; font-size:13px;">Mã OTP đã hết hạn. Vui lòng quay lại để gửi lại mã mới.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Form xác thực / đổi mật khẩu -->
+            <div class="action-panel">
+
+                <!-- STEP 1: Chưa xác thực OTP -->
+                <div th:if="${!otpVerified}">
+                    <div class="step-badge"><i class="fa fa-shield"></i> Bước 1 / 2</div>
+                    <h4>Xác thực học viên</h4>
+                    <p class="desc">Nhập mã OTP được hiển thị trong hộp thư email ảo phía bên trái màn hình.</p>
+
+                    <form th:action="@{/student/gmail/verify-otp}" method="post">
+                        <div class="form-field">
+                            <label>Mã OTP (6 chữ số)</label>
+                            <input type="text" name="otp" class="otp-input form-control"
+                                   placeholder="• • • • • •" maxlength="6" required
+                                   style="font-size:28px; letter-spacing:12px; height:70px; text-align:center; font-weight:bold; border:2px solid var(--ec-blue); border-radius:10px;">
+                        </div>
+
+                        <button type="submit" class="btn-google">
+                            <i class="fa fa-check"></i> XÁC THỰC MÃ OTP
+                        </button>
+                    </form>
+
+                    <div th:if="${error}" class="mt-3" style="background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:10px 14px;">
+                        <i class="fa fa-times-circle" style="color:#dc2626;"></i>
+                        <span style="color:#dc2626; font-size:13px; font-weight:600;" th:text="${error}"></span>
+                    </div>
+
+                    <div class="divider"></div>
+                    <div style="text-align:center;">
+                        <a th:href="@{/login}" style="color:var(--ec-blue); font-size:13px; text-decoration:none;">
+                            <i class="fa fa-arrow-left"></i> Quay lại đăng nhập
+                        </a>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Đã xác thực, đổi mật khẩu -->
+                <div th:if="${otpVerified}">
+                    <div class="success-badge">
+                        <i class="fa fa-check-circle" style="color:#22c55e; font-size:18px;"></i>
+                        Xác thực thành công! Hãy đặt mật khẩu mới.
+                    </div>
+
+                    <div class="step-badge" style="background:rgba(16,185,129,0.1); color:#059669;"><i class="fa fa-lock"></i> Bước 2 / 2</div>
+                    <h4>Đặt mật khẩu mới</h4>
+                    <p class="desc">Chào <strong th:text="${userName}">học viên</strong>! Vui lòng nhập mật khẩu mới cho tài khoản của bạn.</p>
+
+                    <form th:action="@{/student/gmail/update-password}" method="post">
+                        <div class="form-field">
+                            <label>Mật khẩu mới</label>
+                            <input type="password" name="newPassword" placeholder="Ít nhất 6 ký tự..." required>
+                        </div>
+                        <div class="form-field">
+                            <label>Xác nhận mật khẩu</label>
+                            <input type="password" name="confirmPassword" placeholder="Nhập lại mật khẩu..." required>
+                        </div>
+
+                        <button type="submit" class="btn-success-update">
+                            <i class="fa fa-save"></i> CẬP NHẬT MẬT KHẨU
+                        </button>
+                    </form>
+
+                    <div th:if="${error}" class="mt-3" style="background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:10px 14px;">
+                        <span style="color:#dc2626; font-size:13px; font-weight:600;" th:text="${error}"></span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/jquery.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+</body>
+</html>

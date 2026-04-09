@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - EngCenter</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/engcenter-design.css}">
+</head>
+
+<body class="ec-body">
+
+    <div class="ec-auth-page">
+        <div class="ec-auth-container ec-animate-fadeIn">
+            <!-- Left Brand Panel -->
+            <div class="ec-auth-brand" style="background: linear-gradient(135deg, #6366F1 0%, #4F46E5 50%, #3730A3 100%); background-size: 200% 200%; animation: ec-gradient-shift 8s ease infinite;">
+                <div class="ec-auth-brand-icon">
+                    <i class="fa fa-graduation-cap"></i>
+                </div>
+                <h2>Mừng Bạn Trở Lại!</h2>
+                <p>Tiếp tục hành trình chinh phục tiếng Anh cùng EngCenter. Đăng nhập để truy cập tài liệu và lớp học của bạn.</p>
+                <div style="margin-top: 30px;">
+                    <a href="/" style="color: rgba(255,255,255,0.8); font-size: 14px; text-decoration: none; transition: all 0.3s;">
+                        <i class="fa fa-home" style="margin-right: 6px;"></i> Quay về trang chủ
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Form Panel -->
+            <div class="ec-auth-form">
+                <!-- Main Login Section -->
+                <div id="loginSection" th:style="${showOtpForm == null && showResetForm == null} ? '' : 'display: none;'">
+                    <h2>Đăng Nhập</h2>
+                    <p class="ec-auth-subtitle">Nhập thông tin để tiếp tục học tập</p>
+
+                    <form action="/login" method="post">
+                        <div class="ec-form-group">
+                            <label class="ec-form-label">Tên đăng nhập / Email</label>
+                            <div class="ec-form-icon-wrap">
+                                <i class="fa fa-user"></i>
+                                <input type="text" name="username" id="usernameInput" class="ec-form-control" placeholder="Vui lòng nhập Username" required />
+                            </div>
+                        </div>
+
+                        <div class="ec-form-group">
+                            <label class="ec-form-label">Mật khẩu</label>
+                            <div class="ec-form-icon-wrap">
+                                <i class="fa fa-lock"></i>
+                                <input type="password" name="password" class="ec-form-control" placeholder="••••••••" required />
+                            </div>
+                        </div>
+
+                        <div style="text-align: right; margin-bottom: 20px;">
+                            <a href="javascript:void(0)" id="forgotPasswordLink" style="font-size: 13px; color: var(--ec-text-light); text-decoration: none;">Quên mật khẩu?</a>
+                        </div>
+
+                        <button type="submit" class="ec-btn ec-btn-primary" style="width: 100%; justify-content: center; padding: 14px; font-size: 16px; border-radius: 12px;">
+                            ĐĂNG NHẬP <i class="fa fa-arrow-right" style="margin-left: 8px;"></i>
+                        </button>
+
+                        <div class="ec-auth-link">
+                            Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Forgot Password Section -->
+                <div id="forgotPasswordSection" style="display: none;">
+                    <h2>Quên Mật Khẩu</h2>
+                    <p class="ec-auth-subtitle">Nhập email để khôi phục tài khoản</p>
+                    <form action="/forgot-password" method="post">
+                        <div class="ec-form-group">
+                            <label class="ec-form-label">Email đăng ký</label>
+                            <div class="ec-form-icon-wrap">
+                                <i class="fa fa-envelope"></i>
+                                <input type="email" name="email" id="forgotEmailInput" class="ec-form-control" placeholder="your@email.com" required />
+                            </div>
+                        </div>
+                        <button type="submit" id="btnSendOtp" class="ec-btn ec-btn-primary" style="width: 100%; justify-content: center; padding: 14px; font-size: 16px; border-radius: 12px; margin-top: 10px;">
+                            GỬI MÃ OTP <i class="fa fa-paper-plane" style="margin-left: 8px;"></i>
+                        </button>
+
+                        <!-- Special Admin Button (Relocated here) -->
+                        <div id="adminBtnArea" style="display: none; margin-top: 15px;">
+                            <a th:href="@{/admin/gmail}" class="ec-btn ec-btn-accent" style="width: 100%; justify-content: center; padding: 12px; border-radius: 12px; font-weight: 700; background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%);">
+                                <i class="fa fa-shield"></i> TRUY CẬP QUẢN TRỊ VIÊN
+                            </a>
+                        </div>
+                        <div class="ec-auth-link">
+                            <a href="javascript:void(0)" id="backToLoginLink" style="color: var(--ec-text-light);"><i class="fa fa-arrow-left"></i> Quay lại đăng nhập</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- OTP Section -->
+                <div id="otpSection" th:if="${showOtpForm}">
+                    <h2>Xác Minh OTP</h2>
+                    <p class="ec-auth-subtitle">Mã đã gửi đến <span th:text="${email}" style="font-weight: bold; color: var(--ec-primary);"></span></p>
+                    <form action="/verify-otp" method="post">
+                        <div class="ec-form-group">
+                            <label class="ec-form-label">Nhập mã 6 số</label>
+                            <div class="ec-form-icon-wrap">
+                                <i class="fa fa-key"></i>
+                                <input type="text" name="otp" class="ec-form-control" placeholder="000000" maxlength="6" style="text-align: center; letter-spacing: 12px; font-size: 24px; font-weight: bold;" required />
+                            </div>
+                        </div>
+                        <button type="submit" class="ec-btn ec-btn-primary" style="width: 100%; justify-content: center; padding: 14px; font-size: 16px; border-radius: 12px;">
+                            XÁC NHẬN <i class="fa fa-check" style="margin-left: 8px;"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Reset Password Section -->
+                <div id="resetPasswordSection" th:if="${showResetForm}">
+                    <h2>Mật Khẩu Mới</h2>
+                    <p class="ec-auth-subtitle">Thiết lập mật khẩu an toàn cho bạn</p>
+                    <form action="/reset-password" method="post">
+                        <div class="ec-form-group">
+                            <label class="ec-form-label">Mật khẩu mới</label>
+                            <div class="ec-form-icon-wrap">
+                                <i class="fa fa-lock"></i>
+                                <input type="password" name="newPassword" class="ec-form-control" placeholder="••••••••" required />
+                            </div>
+                        </div>
+                        <div class="ec-form-group">
+                            <label class="ec-form-label">Xác nhận mật khẩu</label>
+                            <div class="ec-form-icon-wrap">
+                                <i class="fa fa-refresh"></i>
+                                <input type="password" name="confirmPassword" class="ec-form-control" placeholder="••••••••" required />
+                            </div>
+                        </div>
+                        <button type="submit" class="ec-btn ec-btn-primary" style="width: 100%; justify-content: center; padding: 14px; font-size: 16px; border-radius: 12px;">
+                            CẬP NHẬT <i class="fa fa-save" style="margin-left: 8px;"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/jquery.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script>
+        $(document).ready(function() {
+            // Section Switchers
+            $('#forgotPasswordLink').click(function() {
+                $('#loginSection').fadeOut(300, function() {
+                    $('#forgotPasswordSection').fadeIn(300);
+                });
+            });
+
+            $('#backToLoginLink').click(function() {
+                $('#forgotPasswordSection').fadeOut(300, function() {
+                    $('#loginSection').fadeIn(300);
+                });
+            });
+
+            // Special Admin Button Logic (Triggered on Forgot Password Email)
+            const forgotEmailInput = $('#forgotEmailInput');
+            const adminBtnArea = $('#adminBtnArea');
+            const btnSendOtp = $('#btnSendOtp');
+            const usernameInput = $('#usernameInput'); // Keep for potential other use
+
+            forgotEmailInput.on('input', function() {
+                const val = $(this).val().trim();
+                if (val === 'admin@gmail.com') {
+                    adminBtnArea.fadeIn(400);
+                    btnSendOtp.fadeOut(400);
+                } else {
+                    adminBtnArea.fadeOut(400);
+                    btnSendOtp.fadeIn(400);
+                }
+            });
+            
+            // Initial check in case of browser autofill
+            if (forgotEmailInput.val() === 'admin@gmail.com') {
+                adminBtnArea.show();
+                btnSendOtp.hide();
+            }
+        });
+    </script>
+</body>
+</html>

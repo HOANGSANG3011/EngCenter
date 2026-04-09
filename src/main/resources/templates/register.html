@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - EngCenter</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/engcenter-design.css}">
+</head>
+
+<body class="ec-body">
+
+    <div class="ec-auth-page">
+        <div class="ec-auth-container ec-animate-fadeIn">
+            <!-- Left Brand Panel -->
+            <div class="ec-auth-brand" style="background: linear-gradient(135deg, #06B6D4 0%, #4F46E5 50%, #7C3AED 100%); background-size: 200% 200%; animation: ec-gradient-shift 8s ease infinite;">
+                <div class="ec-auth-brand-icon">
+                    <i class="fa fa-user-plus"></i>
+                </div>
+                <h2>Tham Gia Ngay!</h2>
+                <p>Tạo tài khoản miễn phí để bắt đầu hành trình học tiếng Anh hiệu quả với EngCenter. Chúng tôi luôn đồng hành cùng bạn.</p>
+                <div style="margin-top: 30px;">
+                    <a href="/" style="color: rgba(255,255,255,0.8); font-size: 14px; text-decoration: none; transition: all 0.3s;">
+                        <i class="fa fa-arrow-left" style="margin-right: 6px;"></i> Quay về trang chủ
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Form Panel -->
+            <div class="ec-auth-form">
+                <h2>Đăng Ký</h2>
+                <p class="ec-auth-subtitle">Tạo tài khoản mới để bắt đầu học</p>
+
+                <form action="/register" method="post" id="registerForm">
+                    <div class="ec-form-group">
+                        <label class="ec-form-label">Họ và tên</label>
+                        <div class="ec-form-icon-wrap">
+                            <i class="fa fa-id-card"></i>
+                            <input type="text" name="fullName" class="ec-form-control" placeholder="Nhập họ tên đầy đủ..." required />
+                        </div>
+                    </div>
+
+                    <div class="ec-form-group">
+                        <label class="ec-form-label">Tên đăng nhập</label>
+                        <div class="ec-form-icon-wrap">
+                            <i class="fa fa-user"></i>
+                            <input type="text" name="username" class="ec-form-control" placeholder="Chọn username..." required />
+                        </div>
+                    </div>
+
+                    <div class="ec-form-group">
+                        <label class="ec-form-label">Email</label>
+                        <div class="ec-form-icon-wrap">
+                            <i class="fa fa-envelope"></i>
+                            <input type="email" name="email" class="ec-form-control" placeholder="example@gmail.com" required />
+                        </div>
+                    </div>
+
+                    <div class="ec-form-group">
+                        <label class="ec-form-label">Số điện thoại</label>
+                        <div class="ec-form-icon-wrap">
+                            <i class="fa fa-phone"></i>
+                            <input type="text" name="phoneNumber" class="ec-form-control" placeholder="0xxx xxx xxx" required />
+                        </div>
+                    </div>
+
+                    <div class="ec-form-group">
+                        <label class="ec-form-label">Mật khẩu</label>
+                        <div class="ec-form-icon-wrap">
+                            <i class="fa fa-lock"></i>
+                            <input type="password" id="password" name="password" class="ec-form-control" placeholder="Tạo mật khẩu..." required />
+                        </div>
+                        <div id="password-strength" class="mt-2" style="height: 5px; border-radius: 3px; background: #eee; transition: all 0.3s;">
+                            <div id="strength-bar" style="height: 100%; width: 0; border-radius: 3px; transition: all 0.3s;"></div>
+                        </div>
+                        <small id="strength-text" style="font-size: 11px; color: #666;"></small>
+                    </div>
+
+                    <div class="ec-form-group">
+                        <label class="ec-form-label">Nhập lại mật khẩu</label>
+                        <div class="ec-form-icon-wrap">
+                            <i class="fa fa-refresh"></i>
+                            <input type="password" id="confirmPassword" class="ec-form-control" placeholder="Xác nhận mật khẩu..." required />
+                        </div>
+                        <small id="match-error" style="color: #ef4444; font-size: 11px; display: none;">Mật khẩu không khớp!</small>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="ec-btn ec-btn-secondary" style="width: 100%; justify-content: center; padding: 14px; font-size: 16px;">
+                        <i class="fa fa-check-circle"></i> Đăng Ký
+                    </button>
+
+                    <div class="ec-auth-link">
+                        Đã có tài khoản? <a href="/login">Đăng nhập ngay</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/jquery.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+
+    <script>
+        $(document).ready(function() {
+            const password = $('#password');
+            const confirmPassword = $('#confirmPassword');
+            const strengthBar = $('#strength-bar');
+            const strengthText = $('#strength-text');
+            const matchError = $('#match-error');
+            const submitBtn = $('#submitBtn');
+
+            password.on('input', function() {
+                const val = $(this).val();
+                let strength = 0;
+                if (val.length > 5) strength += 20;
+                if (val.match(/[a-z]/)) strength += 20;
+                if (val.match(/[A-Z]/)) strength += 20;
+                if (val.match(/[0-9]/)) strength += 20;
+                if (val.match(/[^a-zA-Z0-9]/)) strength += 20;
+
+                strengthBar.css('width', strength + '%');
+                
+                if (strength <= 40) {
+                    strengthBar.css('background-color', '#ef4444');
+                    strengthText.text('Yếu').css('color', '#ef4444');
+                } else if (strength <= 80) {
+                    strengthBar.css('background-color', '#f59e0b');
+                    strengthText.text('Trung bình').css('color', '#f59e0b');
+                } else {
+                    strengthBar.css('background-color', '#10b981');
+                    strengthText.text('Mạnh').css('color', '#10b981');
+                }
+                validateMatch();
+            });
+
+            confirmPassword.on('input', validateMatch);
+
+            function validateMatch() {
+                if (confirmPassword.val() === '') {
+                    matchError.hide();
+                    submitBtn.prop('disabled', false);
+                } else if (password.val() !== confirmPassword.val()) {
+                    matchError.show();
+                    submitBtn.prop('disabled', true);
+                } else {
+                    matchError.hide();
+                    submitBtn.prop('disabled', false);
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

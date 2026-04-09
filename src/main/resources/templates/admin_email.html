@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Recovery - EngCenter x Gmail</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/engcenter-design.css}">
+    <style>
+        :root {
+            --gmail-sidebar: #f6f8fc;
+            --gmail-active: #d3e3fd;
+            --ec-primary: #4F46E5;
+        }
+        body {
+            background-color: #fff;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        .gmail-header {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #fff;
+        }
+        .gmail-logo-box {
+            display: flex;
+            align-items: center;
+            width: 240px;
+        }
+        .gmail-logo-box img {
+            height: 24px;
+            margin-right: 10px;
+        }
+        .gmail-search {
+            flex-grow: 1;
+            max-width: 720px;
+            background: #f1f3f4;
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+        }
+        .gmail-search i { color: #5f6368; margin-right: 12px; }
+        .gmail-search input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            outline: none;
+        }
+        .main-container {
+            display: flex;
+            flex-grow: 1;
+        }
+        .sidebar {
+            width: 256px;
+            background: var(--gmail-sidebar);
+            padding: 8px;
+        }
+        .compose-btn {
+            background: #c2e7ff;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 4px 12px 4px 24px;
+            border-radius: 0 20px 20px 0;
+            cursor: pointer;
+            color: #202124;
+            height: 32px;
+            margin-bottom: 2px;
+        }
+        .nav-item i { margin-right: 16px; width: 20px; text-align: center; }
+        .nav-item.active {
+            background: var(--gmail-active);
+            font-weight: bold;
+        }
+        .content-area {
+            flex-grow: 1;
+            padding: 20px;
+            background: #fff;
+            position: relative;
+            overflow-y: auto;
+        }
+        /* EngCenter Overlay */
+        .ec-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 450px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            padding: 40px;
+            border-top: 5px solid var(--ec-primary);
+            z-index: 100;
+        }
+        .ec-otp-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .otp-box {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            width: 400px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="gmail-header">
+        <div class="gmail-logo-box">
+            <i class="fa fa-bars" style="margin-right: 20px; color: #5f6368; cursor: pointer;"></i>
+            <span style="font-size: 22px; color: #5f6368;"><i class="fa fa-envelope" style="color: #ea4335;"></i> Gmail</span>
+        </div>
+        <div class="gmail-search">
+            <i class="fa fa-search"></i>
+            <input type="text" placeholder="Tìm kiếm trong thư">
+        </div>
+        <div style="width: 240px; display: flex; justify-content: flex-end; align-items: center; color: #5f6368;">
+            <i class="fa fa-question-circle-o" style="margin-right: 20px;"></i>
+            <i class="fa fa-cog" style="margin-right: 20px;"></i>
+            <div style="width: 32px; height: 32px; background: #4F46E5; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">A</div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <button class="compose-btn"><i class="fa fa-pencil" style="margin-right: 12px;"></i> Soạn thư</button>
+            <div class="nav-item active"><i class="fa fa-inbox"></i> Hộp thư đến <span style="margin-left: auto;">(1)</span></div>
+            <div class="nav-item"><i class="fa fa-star-o"></i> Có gắn dấu sao</div>
+            <div class="nav-item"><i class="fa fa-clock-o"></i> Đã tạm ẩn</div>
+            <div class="nav-item"><i class="fa fa-paper-plane-o"></i> Đã gửi</div>
+            <div class="nav-item"><i class="fa fa-file-text-o"></i> Bản nháp</div>
+            <div class="nav-item"><i class="fa fa-trash-o"></i> Thùng rác</div>
+        </div>
+        
+        <div class="content-area">
+            <!-- Simulated Email List -->
+            <div style="padding: 10px; border-bottom: 1px solid #f1f3f4; display: flex; align-items: center;">
+                <input type="checkbox" style="margin-right: 15px;">
+                <i class="fa fa-refresh" style="margin-right: 20px; color: #5f6368;"></i>
+                <i class="fa fa-ellipsis-v" style="color: #5f6368;"></i>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 10px 16px; border-bottom: 1px solid #e0e0e0; font-weight: bold; display: flex;">
+                <div style="flex: 1;">Người gửi</div>
+                <div style="flex: 2;">Chủ đề</div>
+                <div style="width: 100px; text-align: right;">Thời gian</div>
+            </div>
+
+            <div style="padding: 10px 16px; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; background: #fff;">
+                <div style="flex: 1; font-weight: bold;">EngCenter Support</div>
+                <div style="flex: 2; font-weight: bold;">[EngCenter] Mã xác minh OTP: <span th:text="${adminOtp}" style="color: #ea4335;">000000</span></div>
+                <div style="width: 100px; text-align: right; font-weight: bold;">Vừa xong</div>
+            </div>
+
+            <!-- EngCenter Reset Form Overlay -->
+            <div class="ec-overlay" th:if="${otpVerified}">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="width: 60px; height: 60px; background: var(--ec-primary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 24px;">
+                        <i class="fa fa-shield"></i>
+                    </div>
+                    <h4 style="color: #111827; margin-bottom: 10px;">Đặt Lại Mật Khẩu Admin</h4>
+                    <p style="font-size: 14px; color: #6b7280;">Hệ thống xác nhận bạn là Admin. Hãy cập nhật mật khẩu mới.</p>
+                </div>
+
+                <form th:action="@{/admin/update-password}" method="post">
+                    <div class="mb-4">
+                        <label class="form-label" style="font-weight: 500; font-size: 14px; color: #374151;">Mật khẩu mới</label>
+                        <input type="password" name="newPassword" class="form-control" placeholder="••••••••" style="padding: 12px; border-radius: 8px;" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label" style="font-weight: 500; font-size: 14px; color: #374151;">Xác nhận mật khẩu mới</label>
+                        <input type="password" name="confirmPassword" class="form-control" placeholder="••••••••" style="padding: 12px; border-radius: 8px;" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" style="background: var(--ec-primary); border: none; padding: 12px; border-radius: 8px; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);">
+                        <i class="fa fa-save"></i> Cập Nhật & Lưu File
+                    </button>
+                    <div style="margin-top: 15px; text-align: center;">
+                        <a th:href="@{/}" style="font-size: 13px; color: #6b7280; text-decoration: none;"><i class="fa fa-arrow-left"></i> Quay lại trang chủ</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- OTP Modal (First Step) -->
+            <div class="ec-otp-modal" th:if="${!otpVerified}">
+                <div class="otp-box">
+                    <div style="font-size: 40px; color: #ea4335; margin-bottom: 20px;"><i class="fa fa-key"></i></div>
+                    <h3>Xác Minh Admin</h3>
+                    <p>Hệ thống đã gửi OTP đến Gmail Admin. Vui lòng kiểm tra và nhập vào đây.</p>
+                    <form th:action="@{/admin/verify-otp}" method="post">
+                        <input type="text" name="otp" class="form-control mb-3" placeholder="6 chữ số" maxlength="6" style="text-align: center; font-size: 24px; letter-spacing: 5px; height: 60px;" required>
+                        <button type="submit" class="btn btn-danger w-100" style="padding: 12px; font-weight: bold;">XÁC NHẬN TRUY CẬP</button>
+                    </form>
+                    <div th:if="${error}" class="mt-3 text-danger" th:text="${error}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/jquery.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script>
+        // Disable back button behavior
+        window.history.pushState(null, "", window.location.href);
+        window.onpopstate = function() {
+            window.location.replace("http://localhost:8080");
+        };
+    </script>
+</body>
+</html>
