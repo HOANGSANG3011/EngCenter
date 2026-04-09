@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đánh giá giáo viên - EngCenter</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/engcenter-design.css}">
+
+    <style>
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        .star-rating input {
+            display: none;
+        }
+        .star-rating label {
+            font-size: 28px;
+            color: var(--ec-text-muted);
+            cursor: pointer;
+            transition: var(--ec-transition-fast);
+        }
+        .star-rating :checked ~ label {
+            color: var(--ec-accent);
+        }
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: var(--ec-accent-light);
+        }
+    </style>
+</head>
+
+<body class="ec-body">
+
+    <!-- NAVBAR -->
+    <section class="navbar ec-navbar navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <a href="/student/home" class="navbar-brand">
+                    <span class="ec-brand-icon" style="background: linear-gradient(135deg, var(--ec-secondary), var(--ec-primary));"><i class="fa fa-graduation-cap"></i></span>
+                    <span class="ec-brand-accent">Student Portal</span>
+                </a>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="/student/home"><i class="fa fa-home"></i> Trang chủ</a></li>
+                    <li><a href="/student/my-classes"><i class="fa fa-book"></i> Lớp của tôi</a></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <div class="container ec-main-content">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="ec-panel ec-animate-fadeInUp">
+                    <div class="ec-panel-header">
+                        <h4><i class="fa fa-star" style="color: var(--ec-accent); margin-right: 8px;"></i> Đánh giá giáo viên</h4>
+                        <a href="/student/my-classes" class="btn btn-link" style="color: var(--ec-text-muted); font-size: 14px;">
+                            <i class="fa fa-times"></i> Hủy
+                        </a>
+                    </div>
+
+                    <form th:action="@{/student/review/save}" method="post">
+                        <input type="hidden" name="tenGiaoVien" th:value="${lopHoc.giaoVien?.ten}">
+
+                        <div style="margin-bottom: 24px; display: flex; align-items: center; gap: 20px; padding: 20px; background: var(--ec-primary-50); border-radius: var(--ec-radius-md);">
+                            <img th:src="@{/images/{img}(img=${lopHoc.hinhAnh})}"
+                                 width="80" height="80"
+                                 style="border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: var(--ec-shadow-sm);">
+                            <div>
+                                <h4 style="margin: 0 0 4px 0; color: var(--ec-primary-dark);" th:text="${lopHoc.giaoVien?.ten}"></h4>
+                                <p style="margin: 0; color: var(--ec-text-light); font-size: 14px;">
+                                    Giáo viên lớp: <strong th:text="${lopHoc.tenLop}"></strong>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 24px;">
+                            <label style="display: block; margin-bottom: 12px; font-weight: 600; color: var(--ec-text);">Mức độ hài lòng</label>
+                            <div class="star-rating">
+                                <input type="radio" id="star5" name="rating" value="5" checked /><label for="star5" title="5 stars"><i class="fa fa-star"></i></label>
+                                <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars"><i class="fa fa-star"></i></label>
+                                <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars"><i class="fa fa-star"></i></label>
+                                <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars"><i class="fa fa-star"></i></label>
+                                <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star"><i class="fa fa-star"></i></label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 30px;">
+                            <label style="display: block; margin-bottom: 12px; font-weight: 600; color: var(--ec-text);">Cảm nghĩ của bạn</label>
+                            <textarea name="comment" class="form-control" rows="5"
+                                      placeholder="Hãy chia sẻ trải nghiệm của bạn với giáo viên này..."
+                                      style="border-radius: var(--ec-radius-md); border-color: var(--ec-border); padding: 15px; resize: vertical;"></textarea>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end;">
+                            <button type="submit" class="ec-btn ec-btn-primary ec-btn-lg">
+                                <i class="fa fa-paper-plane"></i> Gửi đánh giá ngay
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/jquery.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+
+</body>
+
+</html>

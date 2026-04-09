@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="student/layout :: layout(~{::section})">
+
+<section>
+    <style>
+        .score-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .score-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .score-title i {
+            margin-right: 12px;
+            font-size: 24px;
+            color: var(--ec-primary);
+        }
+
+        .table-custom {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .table-custom th {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 13px;
+            padding: 10px 15px;
+        }
+
+        .table-custom tr {
+            background: #f8fafc;
+            transition: transform 0.2s;
+        }
+
+        .table-custom tr:hover {
+            transform: scale(1.005);
+            background: #f1f5f9;
+        }
+
+        .table-custom td {
+            padding: 15px;
+            border: none;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .table-custom td:first-child {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        .table-custom td:last-child {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .score-badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 800;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .score-high { background: #dcfce7; color: #166534; }
+        .score-mid { background: #fef3c7; color: #92400e; }
+        .score-low { background: #fee2e2; color: #991b1b; }
+
+        .teacher-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .teacher-info i {
+            margin-right: 8px;
+            color: #94a3b8;
+        }
+    </style>
+
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            
+            <div class="score-card animate__animated animate__fadeIn">
+                <div class="score-title" style="flex-direction: column; align-items: flex-start; gap: 15px;">
+                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                        <span><i class="fa fa-line-chart"></i> Kết quả học tập</span>
+                        <span style="font-size: 14px; color: #64748b;">
+                            <i class="fa fa-user"></i> <strong th:text="${studentName}">Username</strong>
+                        </span>
+                    </div>
+
+                    <!-- Teacher Selector Form -->
+                    <form action="/student/diem" method="get" id="filterForm" style="width: 100%; border-top: 1px solid #f1f5f9; padding-top: 15px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label style="font-size: 13px; color: #64748b; margin: 0; white-space: nowrap;">Lọc theo giáo viên:</label>
+                            <select name="teacherId" class="form-control" style="max-width: 300px; height: 38px; border-radius: 8px;" onchange="document.getElementById('filterForm').submit()">
+                                <option value="0">--- Tất cả bài kiểm tra của tôi ---</option>
+                                <option th:each="t : ${teachers}" 
+                                        th:value="${t.id}" 
+                                        th:text="${t.ten}"
+                                        th:selected="${t.id == selectedTeacherId}">
+                                </option>
+                            </select>
+                            <span th:if="${selectedTeacherId != null && selectedTeacherId > 0}" 
+                                  style="font-size: 12px; color: #4f46e5; background: #eef2ff; padding: 4px 12px; border-radius: 20px; font-weight: 600;">
+                                Đang xem lớp của <span th:text="${selectedTeacherName}"></span>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                
+                <div th:if="${results == null || results.isEmpty()}" class="alert alert-info" style="border-radius: 12px; border: none; background: #f8fafc; color: #64748b;">
+                    <i class="fa fa-info-circle"></i> Không tìm thấy dữ liệu điểm cho mục này.
+                </div>
+
+                <div th:if="${results != null && !results.isEmpty()}">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th th:if="${selectedTeacherId != null && selectedTeacherId > 0}">Học viên</th>
+                                <th>Bài kiểm tra</th>
+                                <th>Giáo viên</th>
+                                <th>Ngày làm</th>
+                                <th>Kết quả</th>
+                                <th>Đánh giá</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="res : ${results}" class="animate__animated animate__fadeInUp">
+                                <td th:if="${selectedTeacherId != null && selectedTeacherId > 0}" style="font-weight: 700;">
+                                    <i class="fa fa-user-circle" style="color: #94a3b8; margin-right: 5px;"></i>
+                                    <span th:text="${res.student != null ? res.student.username : 'Ẩn danh'}"></span>
+                                </td>
+                                <td th:text="${res.quiz.title}">Tên bài kiểm tra</td>
+                                <td>
+                                    <div class="teacher-info">
+                                        <i class="fa fa-user"></i>
+                                        <span th:text="${res.quiz?.teacher?.ten ?: 'Không xác định'}">Tên giáo viên</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span th:if="${res.quiz?.testDate != null}" th:text="${#temporals.format(res.quiz.testDate, 'dd/MM/yyyy')}">01/01/2026</span>
+                                    <span th:if="${res.quiz?.testDate == null}">-</span>
+                                </td>
+                                <td>
+                                    <div class="score-badge" 
+                                         th:classappend="${res.score >= 8 ? 'score-high' : (res.score >= 5 ? 'score-mid' : 'score-low')}">
+                                        <span th:text="${res.score}">0</span> / 10
+                                    </div>
+                                </td>
+                                <td>
+                                    <span th:if="${res.score >= 8}" class="text-success" style="font-weight: 700;">Xuất sắc!</span>
+                                    <span th:if="${res.score >= 5 && res.score < 8}" class="text-warning" style="font-weight: 700;">Đạt</span>
+                                    <span th:if="${res.score < 5}" class="text-danger" style="font-weight: 700;">Cần cố gắng</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-top: 30px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
+                    <p class="text-muted" style="font-style: italic;">
+                        <i class="fa fa-lightbulb-o"></i> <strong>Mẹo:</strong> Hãy liên hệ với giáo viên nếu bạn có thắc mắc về kết quả bài kiểm tra.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+</html>

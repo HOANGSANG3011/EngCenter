@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán học phí | EngCenter</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #4F46E5; --secondary: #06B6D4; --success: #10B981; --danger: #EF4444;
+            --momo: #AE2070; --momo-light: #fdf2f7;
+            --slate-50: #F8FAFC; --slate-100: #F1F5F9; --slate-600: #475569; --slate-800: #1E293B;
+        }
+        body { background: linear-gradient(135deg,#f0f4ff,#e5eaff); font-family:'Inter',sans-serif; min-height:100vh; display:flex; align-items:center; padding:40px 0; }
+
+        .payment-card { background:rgba(255,255,255,.97); border-radius:24px; box-shadow:0 20px 60px rgba(0,0,0,.12); border:1px solid rgba(255,255,255,.6); overflow:hidden; max-width:620px; margin:auto; }
+
+        .payment-header { background:linear-gradient(135deg,var(--primary),var(--secondary)); padding:30px; text-align:center; color:white; }
+        .payment-header h3 { font-weight:800; margin:0; font-size:22px; }
+        .payment-header p { margin-top:6px; opacity:.88; font-size:14px; }
+
+        .payment-body { padding:30px; }
+
+        .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; background:var(--slate-50); padding:16px; border-radius:14px; border:1px solid #e9edf5; }
+        .info-item label { display:block; font-size:11px; text-transform:uppercase; font-weight:700; color:var(--slate-600); margin-bottom:3px; }
+        .info-item span { font-weight:700; color:var(--slate-800); font-size:14px; }
+
+        .price-tag { text-align:center; margin-bottom:22px; padding:16px; background:linear-gradient(135deg,rgba(79,70,229,.05),rgba(6,182,212,.05)); border-radius:14px; border:1px dashed rgba(79,70,229,.3); }
+        .price-label { font-size:12px; color:var(--slate-600); font-weight:500; }
+        .price-value { font-size:32px; font-weight:900; color:var(--primary); }
+
+        .form-control { height:50px; border-radius:12px; border:2px solid var(--slate-100); background:var(--slate-50); font-weight:500; transition:all .3s; }
+        .form-control:focus { background:white; border-color:var(--primary); box-shadow:0 0 0 3px rgba(79,70,229,.12); outline:none; }
+
+        /* === TABS === */
+        .method-tabs { display:flex; gap:6px; margin-bottom:20px; background:var(--slate-50); padding:5px; border-radius:14px; border:1px solid #e9edf5; }
+        .method-tab { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 4px; border-radius:10px; cursor:pointer; transition:all .3s; background:transparent; border:none; font-size:11px; font-weight:700; color:var(--slate-600); gap:4px; text-transform:uppercase; letter-spacing:.03em; }
+        .method-tab i { font-size:17px; }
+        .method-tab.active { background:white; color:var(--primary); box-shadow:0 4px 12px rgba(79,70,229,.15); }
+        .method-tab.active-momo { background:white; color:var(--momo); box-shadow:0 4px 12px rgba(174,32,112,.15); }
+
+        /* === SUB TABS for QR & Bank === */
+        .sub-tabs { display:flex; gap:6px; margin-bottom:16px; }
+        .sub-tab { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; border:2px solid #e9edf5; border-radius:12px; cursor:pointer; font-size:12px; font-weight:700; color:var(--slate-600); background:white; transition:all .3s; }
+        .sub-tab:hover { border-color:rgba(79,70,229,.3); }
+        .sub-tab.active-qr-momo { border-color:var(--momo); color:var(--momo); background:var(--momo-light); }
+        .sub-tab.active-qr-shoppe { border-color:#EE4D2D; color:#EE4D2D; background:#fff5f3; }
+        .sub-tab.active-qr-vcb { border-color:#007a4d; color:#007a4d; background:#f0fff7; }
+        .sub-tab.active-bank-vcb, .sub-tab.active-bank-tcb, .sub-tab.active-bank-mb { border-color:var(--primary); color:var(--primary); background:rgba(79,70,229,.06); }
+
+        /* === PANELS === */
+        .panel { display:none; animation:fadeIn .3s ease; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+        .qr-center { text-align:center; padding:20px 10px; }
+        .qr-img-wrap { width:200px; height:200px; margin:0 auto 12px; border-radius:16px; overflow:hidden; border:3px solid; display:flex; align-items:center; justify-content:center; background:white; position:relative; }
+        .qr-img-wrap img.main-qr { width:100%; height:100%; object-fit:cover; }
+        .qr-center-logo { position:absolute; width:38px; height:38px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,.15); }
+        .qr-center-logo img { width:28px; height:28px; object-fit:contain; border-radius:50%; }
+
+        .bank-info-box { background:#f8fafc; padding:18px 20px; border-radius:14px; margin-bottom:14px; border:1px solid #e9edf5; }
+        .bank-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f1f5f9; }
+        .bank-row:last-child { border-bottom:none; }
+        .bank-row .key { color:#64748b; font-size:13px; }
+        .bank-row .val { font-weight:700; color:var(--slate-800); font-size:13px; }
+        .bank-row .val.ref { color:var(--danger); }
+
+        .btn-pay { background:linear-gradient(135deg,var(--primary),#4338CA); color:white; border:none; height:52px; border-radius:12px; font-weight:700; font-size:15px; width:100%; margin-top:16px; transition:all .3s; box-shadow:0 8px 20px rgba(79,70,229,.3); }
+        .btn-pay:hover { transform:translateY(-2px); box-shadow:0 12px 25px rgba(79,70,229,.4); color:white; }
+
+        .polling-status { margin-top:12px; font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .spinner { width:16px; height:16px; border:2.5px solid rgba(79,70,229,.15); border-top:2.5px solid var(--primary); border-radius:50%; animation:spin 1s linear infinite; flex-shrink:0; }
+        .spinner-momo { border-color:rgba(174,32,112,.15); border-top-color:var(--momo); }
+        .spinner-shoppe { border-color:rgba(238,77,45,.15); border-top-color:#EE4D2D; }
+        .spinner-vcb { border-color:rgba(0,122,77,.15); border-top-color:#007a4d; }
+        @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+
+        .debug-panel { margin-top:12px; padding:12px; background:#fff1f2; border-radius:10px; border:1px solid #fecdd3; text-align:center; }
+        .debug-tag { display:block; font-size:10px; color:var(--danger); text-transform:uppercase; font-weight:800; margin-bottom:6px; }
+
+        .cash-note { text-align:center; padding:20px; background:#f0fff4; border-radius:14px; margin-bottom:14px; border:1px solid #bbf7d0; }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="payment-card animate__animated animate__zoomIn">
+        <div class="payment-header">
+            <h3>💳 Thanh toán học phí</h3>
+            <p>Hoàn tất đăng ký khóa học của bạn</p>
+        </div>
+
+        <div class="payment-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Khóa học</label>
+                    <span th:text="${dk.lopHoc.tenLop}"></span>
+                </div>
+                <div class="info-item">
+                    <label>Giảng viên</label>
+                    <span th:text="${dk.lopHoc.giaoVien.ten}"></span>
+                </div>
+            </div>
+
+            <div class="price-tag">
+                <div class="price-label">Tổng cộng cần thanh toán</div>
+                <div class="price-value">
+                    <span th:text="${#numbers.formatDecimal(dk.hocPhi,0,'COMMA',0,'POINT')}"></span>
+                    <span style="font-size:17px;font-weight:600;"> VNĐ</span>
+                </div>
+            </div>
+
+            <!-- MAIN TABS -->
+            <div class="method-tabs">
+                <button type="button" class="method-tab active" onclick="switchMain('cash', this)" id="t-cash">
+                    <i class="fa fa-money"></i>Tiền mặt
+                </button>
+                <button type="button" class="method-tab" onclick="switchMain('bank', this)" id="t-bank">
+                    <i class="fa fa-university"></i>Chuyển khoản
+                </button>
+                <button type="button" class="method-tab" onclick="switchMain('qr', this)" id="t-qr">
+                    <i class="fa fa-qrcode"></i>Mã QR
+                </button>
+            </div>
+
+            <form id="paymentForm" th:action="@{/student/pay}" method="post">
+                <input type="hidden" name="id" id="dkId" th:value="${dk.id}"/>
+                <input type="hidden" name="phuongThuc" id="selectedMethod" value="TIEN_MAT"/>
+
+                <div class="form-group mb-3">
+                    <label style="font-weight:600; font-size:14px;">Họ tên người thanh toán</label>
+                    <input type="text" name="hoTen" class="form-control" placeholder="Nhập họ và tên đầy đủ..." required>
+                </div>
+
+                <!-- ===== TIỀN MẶT ===== -->
+                <div id="panel-cash" class="panel" style="display:block;">
+                    <div class="cash-note">
+                        <i class="fa fa-map-marker" style="font-size:26px;color:var(--success);display:block;margin-bottom:8px;"></i>
+                        <p style="font-weight:600;color:#065f46;margin:0;font-size:14px;">Vui lòng đến quầy tiếp nhận của Trung tâm để nộp học phí trực tiếp tại địa chỉ chi nhánh bạn đã đăng ký.</p>
+                    </div>
+                    <button type="submit" class="btn btn-pay">✔ Xác nhận đã thanh toán tiền mặt</button>
+                </div>
+
+                <!-- ===== CHUYỂN KHOẢN ===== -->
+                <div id="panel-bank" class="panel">
+                    <p style="font-size:13px;color:#64748b;margin-bottom:12px;">Chọn ngân hàng để xem thông tin chuyển khoản:</p>
+                    <div class="sub-tabs">
+                        <div class="sub-tab" onclick="switchBank('vcb', this)" id="st-vcb">
+                            <span>🟢</span> Vietcombank
+                        </div>
+                        <div class="sub-tab" onclick="switchBank('tcb', this)" id="st-tcb">
+                            <span>🔴</span> Techcombank
+                        </div>
+                        <div class="sub-tab" onclick="switchBank('mb', this)" id="st-mb">
+                            <span>🔵</span> MB Bank
+                        </div>
+                    </div>
+
+                    <div id="bank-vcb" class="bank-info-box" style="display:none;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:18px;">🟢</span><span style="font-weight:700;">Vietcombank (VCB)</span></div>
+                        <div class="bank-row"><span class="key">Số tài khoản</span><span class="val">1234567890</span></div>
+                        <div class="bank-row"><span class="key">Chủ tài khoản</span><span class="val">TRUNG TAM TIENG ANH</span></div>
+                        <div class="bank-row"><span class="key">Chi nhánh</span><span class="val">Hồ Chí Minh</span></div>
+                        <div class="bank-row"><span class="key">Nội dung chuyển khoản</span><span class="val ref" th:text="${maHocPhi}"></span></div>
+                    </div>
+                    <div id="bank-tcb" class="bank-info-box" style="display:none;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:18px;">🔴</span><span style="font-weight:700;">Techcombank (TCB)</span></div>
+                        <div class="bank-row"><span class="key">Số tài khoản</span><span class="val">0987654321</span></div>
+                        <div class="bank-row"><span class="key">Chủ tài khoản</span><span class="val">TRUNG TAM TIENG ANH</span></div>
+                        <div class="bank-row"><span class="key">Chi nhánh</span><span class="val">Hồ Chí Minh</span></div>
+                        <div class="bank-row"><span class="key">Nội dung chuyển khoản</span><span class="val ref" th:text="${maHocPhi}"></span></div>
+                    </div>
+                    <div id="bank-mb" class="bank-info-box" style="display:none;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:18px;">🔵</span><span style="font-weight:700;">MB Bank</span></div>
+                        <div class="bank-row"><span class="key">Số tài khoản</span><span class="val">1122334455</span></div>
+                        <div class="bank-row"><span class="key">Chủ tài khoản</span><span class="val">TRUNG TAM TIENG ANH</span></div>
+                        <div class="bank-row"><span class="key">Chi nhánh</span><span class="val">Hồ Chí Minh</span></div>
+                        <div class="bank-row"><span class="key">Nội dung chuyển khoản</span><span class="val ref" th:text="${maHocPhi}"></span></div>
+                    </div>
+
+                    <div class="form-group mb-2" id="bank-txn" style="display:none;">
+                        <label style="font-size:13px;font-weight:600;">Mã giao dịch (sau khi chuyển)</label>
+                        <input type="text" name="maGiaoDich" class="form-control" placeholder="VD: VCB123456...">
+                    </div>
+                    <button type="submit" class="btn btn-pay" id="bank-submit" style="display:none;">✔ Xác nhận chuyển khoản</button>
+                </div>
+
+                <!-- ===== MÃ QR ===== -->
+                <div id="panel-qr" class="panel">
+                    <p style="font-size:13px;color:#64748b;margin-bottom:12px;">Chọn ví / ngân hàng để hiển thị mã QR:</p>
+                    <div class="sub-tabs">
+                        <div class="sub-tab" onclick="switchQR('momo', this)" id="sq-momo">
+                            <span>💜</span> MoMo
+                        </div>
+                        <div class="sub-tab" onclick="switchQR('shoppe', this)" id="sq-shoppe">
+                            <span>🛒</span> ShopeePay
+                        </div>
+                        <div class="sub-tab" onclick="switchQR('vcb', this)" id="sq-vcb">
+                            <span>🏦</span> VCB QR
+                        </div>
+                    </div>
+
+                    <!-- MoMo QR -->
+                    <div id="qr-momo" class="qr-center" style="display:none;">
+                        <div class="qr-img-wrap" style="border-color:var(--momo);">
+                            <img id="qr-img-momo" class="main-qr" src="" alt="MoMo QR">
+                            <div class="qr-center-logo">
+                                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo"
+                                     onerror="this.src='https://static.mservice.io/img/logo-momo.png'">
+                            </div>
+                        </div>
+                        <p style="font-size:12px;color:#888;margin-bottom:4px;">Quét bằng ứng dụng MoMo</p>
+                        <p style="font-size:13px;font-weight:700;color:var(--momo);">SĐT MoMo: 0909 123 456</p>
+                        <a id="momoDeepLink" href="#" onclick="openMoMoApp(event)" class="btn" style="background:var(--momo);color:white;border-radius:10px;padding:10px 20px;font-weight:700;font-size:13px;display:inline-block;margin-top:6px;text-decoration:none;">
+                            <i class="fa fa-mobile"></i> Mở App MoMo
+                        </a>
+                        <div class="polling-status" style="color:var(--momo);">
+                            <div class="spinner spinner-momo"></div> Đang chờ thanh toán MoMo...
+                        </div>
+                        <div class="debug-panel">
+                            <span class="debug-tag">Demo</span>
+                            <button type="button" class="btn btn-sm" onclick="simulatePhoneApprove()" style="background:var(--momo);color:white;border-radius:8px;font-size:12px;border:none;padding:6px 14px;">💜 Giả lập MoMo thành công</button>
+                        </div>
+                    </div>
+
+                    <!-- ShopeePay QR -->
+                    <div id="qr-shoppe" class="qr-center" style="display:none;">
+                        <div class="qr-img-wrap" style="border-color:#EE4D2D;">
+                            <img id="qr-img-shoppe" class="main-qr" src="" alt="ShopeePay QR">
+                            <div class="qr-center-logo">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Shopee.svg/2048px-Shopee.svg.png" alt="Shoppe">
+                            </div>
+                        </div>
+                        <p style="font-size:12px;color:#888;margin-bottom:4px;">Quét bằng ứng dụng ShopeePay</p>
+                        <p style="font-size:13px;font-weight:700;color:#EE4D2D;">SĐT ShopeePay: 0909 123 456</p>
+                        <div class="polling-status" style="color:#EE4D2D;">
+                            <div class="spinner spinner-shoppe"></div> Đang chờ thanh toán ShopeePay...
+                        </div>
+                        <div class="debug-panel">
+                            <span class="debug-tag">Demo</span>
+                            <button type="button" class="btn btn-sm" onclick="simulatePhoneApprove()" style="background:#EE4D2D;color:white;border-radius:8px;font-size:12px;border:none;padding:6px 14px;">🛒 Giả lập ShopeePay thành công</button>
+                        </div>
+                    </div>
+
+                    <!-- VCB QR -->
+                    <div id="qr-vcb" class="qr-center" style="display:none;">
+                        <div class="qr-img-wrap" style="border-color:#007a4d;">
+                            <img id="qr-img-vcb" class="main-qr" src="" alt="VCB QR">
+                            <div class="qr-center-logo" style="color:#007a4d;font-weight:900;font-size:10px;">VCB</div>
+                        </div>
+                        <p style="font-size:12px;color:#888;margin-bottom:4px;">Quét bằng App VCB Digibank</p>
+                        <p style="font-size:13px;font-weight:700;color:#007a4d;">STK: 1234567890 - VIETCOMBANK</p>
+                        <div class="polling-status" style="color:#007a4d;">
+                            <div class="spinner spinner-vcb"></div> Đang chờ xác nhận chuyển khoản...
+                        </div>
+                        <div class="debug-panel">
+                            <span class="debug-tag">Demo</span>
+                            <button type="button" class="btn btn-sm" onclick="simulatePhoneApprove()" style="background:#007a4d;color:white;border-radius:8px;font-size:12px;border:none;padding:6px 14px;">🏦 Giả lập VCB thành công</button>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="/student/my-classes" class="text-muted" style="text-decoration:none;font-size:13px;">
+                    <i class="fa fa-angle-left"></i> Quay lại lớp học của tôi
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    let pollingInterval = null;
+    const dkId = document.getElementById("dkId").value;
+    const MOMO_PHONE = '0909123456';
+    const hocPhiRaw = /*[[${dk.hocPhi}]]*/ 0;
+    const maHocPhi = /*[[${maHocPhi}]]*/ 'HP001';
+
+    function switchMain(panel, tabEl) {
+        // Reset main tabs
+        document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active','active-momo'));
+        tabEl.classList.add('active');
+
+        // Hide all panels
+        ['panel-cash','panel-bank','panel-qr'].forEach(id => {
+            document.getElementById(id).style.display = 'none';
+        });
+
+        document.getElementById('selectedMethod').value =
+            panel === 'cash' ? 'TIEN_MAT' : panel === 'bank' ? 'CHUYEN_KHOAN' : 'QR';
+
+        stopPolling();
+        document.getElementById('panel-' + panel).style.display = 'block';
+    }
+
+    function switchBank(bank, el) {
+        document.querySelectorAll('.sub-tab').forEach(t => t.className = 'sub-tab');
+        el.classList.add('active-bank-' + bank);
+        ['vcb','tcb','mb'].forEach(b => document.getElementById('bank-' + b).style.display = 'none');
+        document.getElementById('bank-' + bank).style.display = 'block';
+        document.getElementById('bank-txn').style.display = 'block';
+        document.getElementById('bank-submit').style.display = 'block';
+        document.getElementById('selectedMethod').value = 'CHUYEN_KHOAN_' + bank.toUpperCase();
+    }
+
+    function switchQR(type, el) {
+        document.querySelectorAll('.sub-tab').forEach(t => t.className = 'sub-tab');
+        el.classList.add('active-qr-' + type);
+        ['momo','shoppe','vcb'].forEach(q => document.getElementById('qr-' + q).style.display = 'none');
+        document.getElementById('qr-' + type).style.display = 'block';
+        stopPolling();
+
+        const amount = Math.round(hocPhiRaw);
+        const note = encodeURIComponent('EngCenter ' + maHocPhi);
+
+        if (type === 'momo') {
+            document.getElementById('selectedMethod').value = 'MOMO';
+            const momoLink = `momo://app?version=2&action=payWithApp&phone=${MOMO_PHONE}&amount=${amount}&description=${note}&appScheme=momo`;
+            document.getElementById('momoDeepLink').setAttribute('data-momo-link', momoLink);
+            document.getElementById('qr-img-momo').src =
+                `https://api.qrserver.com/v1/create-qr-code/?size=195x195&color=AE2070&bgcolor=FFFFFF&data=${encodeURIComponent(momoLink)}`;
+
+        } else if (type === 'shoppe') {
+            document.getElementById('selectedMethod').value = 'SHOPPE_PAY';
+            const shoppeLink = `shopeepay://pay?amount=${amount}&note=${note}&to=${MOMO_PHONE}`;
+            document.getElementById('qr-img-shoppe').src =
+                `https://api.qrserver.com/v1/create-qr-code/?size=195x195&color=EE4D2D&bgcolor=FFFFFF&data=${encodeURIComponent(shoppeLink)}`;
+
+        } else if (type === 'vcb') {
+            document.getElementById('selectedMethod').value = 'QR_VCB';
+            // VietQR standard format: bank/STK/amount/note
+            const vcbData = `https://img.vietqr.io/image/VCB-1234567890-compact2.png?amount=${amount}&addInfo=${note}&accountName=TRUNG+TAM+TIENG+ANH`;
+            document.getElementById('qr-img-vcb').src =
+                `https://api.qrserver.com/v1/create-qr-code/?size=195x195&color=007a4d&bgcolor=FFFFFF&data=${encodeURIComponent(vcbData)}`;
+        }
+
+        startPolling();
+    }
+
+    function openMoMoApp(e) {
+        e.preventDefault();
+        const link = document.getElementById('momoDeepLink').getAttribute('data-momo-link');
+        if (link) {
+            window.location.href = link;
+            setTimeout(() => {
+                const ua = navigator.userAgent;
+                if (/Android/.test(ua)) window.open('https://play.google.com/store/apps/details?id=com.mservice.momotransfer','_blank');
+                else if (/iPhone|iPad/.test(ua)) window.open('https://apps.apple.com/vn/app/momo-e-wallet/id918751511','_blank');
+            }, 2500);
+        }
+    }
+
+    function startPolling() {
+        if (pollingInterval) return;
+        pollingInterval = setInterval(async () => {
+            try {
+                const res = await fetch(`/student/api/payment/status/${dkId}`);
+                if ((await res.text()) === 'DA_DONG') window.location.href = '/student/my-classes?success=paid';
+            } catch(e) {}
+        }, 2000);
+    }
+
+    function stopPolling() {
+        if (pollingInterval) { clearInterval(pollingInterval); pollingInterval = null; }
+    }
+
+    async function simulatePhoneApprove() {
+        const res = await fetch(`/student/api/payment/simulate-phone-approve/${dkId}`, {method:'POST'});
+        if ((await res.text()) !== 'SUCCESS') alert('Lỗi giả lập!');
+    }
+
+    window.onload = () => {
+        switchMain('cash', document.getElementById('t-cash'));
+    };
+</script>
+</body>
+</html>

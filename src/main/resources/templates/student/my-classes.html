@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lớp đã đăng ký - EngCenter</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/engcenter-design.css}">
+
+    <style>
+        .ec-btn-warning {
+            background: #f39c12;
+            color: white;
+            border-radius: 20px;
+            padding: 6px 12px;
+            border: none;
+        }
+
+        .ec-btn-warning:hover {
+            background: #d68910;
+            color: #fff;
+        }
+
+        .price-text {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .badge-paid {
+            background: #2ecc71;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+
+<body class="ec-body" id="top">
+
+<!-- NAVBAR -->
+<section class="navbar ec-navbar navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+            </button>
+
+            <a href="/student/home" class="navbar-brand">
+                <span class="ec-brand-icon"
+                      style="background: linear-gradient(135deg, var(--ec-secondary), var(--ec-primary));">
+                    <i class="fa fa-graduation-cap"></i>
+                </span>
+                <span class="ec-brand-accent">Student Portal</span>
+            </a>
+        </div>
+
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/student/home"><i class="fa fa-home"></i> Trang chủ</a></li>
+                <li><a href="/student/classes"><i class="fa fa-list-ul"></i> Lớp học</a></li>
+                <li class="ec-nav-logout">
+                    <a href="/logout"><i class="fa fa-sign-out"></i> Đăng xuất</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- MAIN -->
+<div class="container ec-main-content">
+
+    <div class="ec-panel ec-animate-fadeInUp">
+
+        <div class="ec-panel-header">
+            <h4>
+                <i class="fa fa-check-circle" style="color: var(--ec-success); margin-right: 8px;"></i>
+                Lớp đã đăng ký
+            </h4>
+
+            <span class="ec-badge ec-badge-success">
+                <i class="fa fa-bookmark"></i> Lớp của tôi
+            </span>
+        </div>
+
+        <!-- 🔔 THÔNG BÁO -->
+        <div th:if="${param.success == 'paid'}"
+             class="alert alert-success">
+            ✔ Thanh toán thành công!
+        </div>
+
+        <div th:if="${param.error == 'full'}"
+             class="alert alert-danger">
+            ❌ Lớp đã đủ sĩ số!
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+            <table class="ec-table">
+
+                <thead>
+                <tr>
+                    <th>Tên lớp</th>
+                    <th>Giáo viên</th>
+                    <th style="text-align:center;">Trạng thái</th>
+                    <th>Học phí</th>
+                    <th style="text-align:center;">Thanh toán</th>
+                    <th style="text-align:center;">Đánh giá</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="dk : ${list}">
+
+                    <!-- Tên lớp -->
+                    <td>
+                        <span style="font-weight:600;"
+                              th:text="${dk.lopHoc.tenLop}">
+                        </span>
+                    </td>
+
+                    <!-- Giáo viên -->
+                    <td>
+                        <i class="fa fa-user" style="color: var(--ec-primary);"></i>
+                        <span th:text="${dk.lopHoc.giaoVien?.ten}"></span>
+                    </td>
+
+                    <!-- Trạng thái -->
+                    <td style="text-align:center;">
+                        <span class="ec-badge ec-badge-accent"
+                              th:text="${dk.trangThai}">
+                        </span>
+                    </td>
+
+                    <!-- Học phí -->
+                    <td>
+                        <span class="price-text"
+                              th:text="${#numbers.formatDecimal(dk.hocPhi, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                        </span>
+                    </td>
+
+                    <!-- Thanh toán -->
+                    <td style="text-align:center;">
+
+                        <!-- Đã đóng -->
+                        <span th:if="${dk.thanhToan == 'DA_DONG'}"
+                              class="badge-paid">
+                            ✔ Đã đóng
+                        </span>
+
+                        <!-- Chưa đóng -->
+                        <th:block th:if="${dk.thanhToan == 'CHUA_DONG'}">
+                            <a th:if="${dk.trangThai == 'DA_DUYET'}"
+                               th:href="@{'/student/pay/' + ${dk.id}}"
+                               onclick="return confirm('Bạn có chắc muốn thanh toán?')"
+                               class="ec-btn ec-btn-warning ec-btn-sm" 
+                               style="background: linear-gradient(135deg, #F59E0B, #D97706); border: none;">
+                                💳 Thanh toán
+                            </a>
+                            <button th:if="${dk.trangThai != 'DA_DUYET'}"
+                               onclick="alert('Đăng ký của bạn chưa được trung tâm duyệt. Vui lòng chờ xác nhận!');"
+                               class="ec-btn ec-btn-warning ec-btn-sm" 
+                               style="background: #e2e8f0; color: #94a3b8; border: none; cursor: not-allowed;" title="Chưa được duyệt">
+                                💳 Chờ duyệt
+                            </button>
+                        </th:block>
+
+                    </td>
+
+                    <!-- Đánh giá -->
+                    <td style="text-align:center;">
+                        <a th:href="@{/student/review/{id}(id=${dk.lopHoc.id})}"
+                           class="ec-btn ec-btn-accent ec-btn-sm">
+                            <i class="fa fa-star"></i> Đánh giá
+                        </a>
+                    </td>
+
+                </tr>
+                </tbody>
+
+            </table>
+        </div>
+
+        <!-- BACK -->
+        <div style="margin-top:20px;">
+            <a href="/student/classes"
+               style="color: var(--ec-text-muted); font-weight:600;">
+                <i class="fa fa-arrow-left"></i> Quay lại danh sách lớp
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+<script th:src="@{/js/jquery.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/custom-effects.js}"></script>
+
+</body>
+</html>

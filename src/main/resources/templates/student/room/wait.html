@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chờ bắt đầu - EngCenter</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/engcenter-design.css}">
+    <style>
+        body {
+            background: #0f172a;
+            color: white;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            overflow: hidden;
+        }
+        .wait-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            padding: 60px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .countdown-timer {
+            font-size: 72px;
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+            margin: 30px 0;
+            background: linear-gradient(135deg, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 20px rgba(129, 140, 248, 0.2);
+        }
+        .class-title {
+            font-size: 24px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .btn-back {
+            margin-top: 30px;
+            color: #64748b;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+        .btn-back:hover {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="wait-container ec-animate-fadeInUp">
+        <div style="font-size: 48px; margin-bottom: 20px;">⌛</div>
+        <h1 style="font-weight: 800; margin-bottom: 5px;">Sắp đến giờ học!</h1>
+        <div class="class-title" th:text="${schedule.monHoc}">Lớp học Tiếng Anh</div>
+        
+        <div class="countdown-timer" id="timer">00:00:00</div>
+        
+        <div style="color: #94a3b8; margin-bottom: 20px;">
+            <div class="loader"></div>
+            Đang chờ giáo viên mở phòng...
+        </div>
+
+        <div style="font-size: 14px; color: #4b5563;">
+            Lớp học sẽ tự động bắt đầu khi đến giờ: <strong th:text="${startTime}"></strong>
+        </div>
+
+        <a href="/student/schedule" class="btn-back">
+            <i class="fa fa-arrow-left"></i> Quay lại thời khóa biểu
+        </a>
+    </div>
+
+    <script th:inline="javascript">
+        const startTimeStr = /*[[${startTime}]]*/ '00:00';
+        const startParts = startTimeStr.split(':');
+        const isToday = /*[[${isToday}]]*/ true;
+        
+        function updateTimer() {
+            const now = new Date();
+            const start = new Date(now);
+            start.setHours(parseInt(startParts[0]), parseInt(startParts[1]), 0);
+
+            // If start time is tomorrow (though controller should handle same-day)
+            if (start < now && isToday) {
+                // Time passed, should redirect
+                window.location.reload(); 
+            }
+
+            const diff = start - now;
+            if (diff <= 0) {
+                window.location.reload();
+                return;
+            }
+
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+
+            document.getElementById('timer').innerText = 
+                `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        setInterval(updateTimer, 1000);
+        updateTimer();
+    </script>
+</body>
+</html>

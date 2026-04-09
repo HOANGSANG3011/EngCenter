@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lớp học ảo - EngCenter</title>
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: 'Segoe UI', 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ========== HEADER ========== */
+        .room-header {
+            background: #1e293b;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            flex-shrink: 0;
+            height: 56px;
+        }
+        .room-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .room-title .subject { font-size: 16px; font-weight: 700; color: #f8fafc; }
+        .room-title .teacher-name { font-size: 12px; color: #94a3b8; }
+        .timer-badge {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .timer-badge.warning { background: #fef3c7; color: #d97706; }
+        .timer-badge.urgent { background: #fee2e2; color: #dc2626; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.6; } }
+        
+        .live-tag {
+            background: #ef4444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .live-tag::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+        
+        .rec-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.7);
+            z-index: 10;
+            background: rgba(0,0,0,0.4);
+            padding: 4px 10px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .rec-dot {
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* ========== PERMISSION OVERLAY ========== */
+        #permissionOverlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.92);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .perm-box {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 40px 50px;
+            text-align: center;
+            max-width: 480px;
+            border: 1px solid #334155;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+        .perm-icon { font-size: 60px; color: #6366f1; margin-bottom: 20px; }
+        .perm-box h2 { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+        .perm-box p { color: #94a3b8; font-size: 14px; line-height: 1.6; margin-bottom: 25px; }
+        /* loading spinner */
+        .perm-spinner {
+            width: 50px; height: 50px;
+            border: 4px solid #334155;
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .btn-allow {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            border: none;
+            padding: 14px 35px;
+            border-radius: 30px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .btn-allow:hover { box-shadow: 0 10px 25px rgba(79,70,229,0.4); transform: translateY(-2px); }
+        .btn-skip {
+            background: transparent;
+            border: 1px solid #475569;
+            padding: 10px 25px;
+            border-radius: 30px;
+            color: #94a3b8;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .btn-skip:hover { border-color: #94a3b8; color: #f8fafc; }
+        .perm-denied { color: #ef4444; font-size: 13px; margin-top: 10px; display: none; }
+
+        /* ========== MAIN LAYOUT ========== */
+        .room-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ========== LEFT: TEACHER VIEW ========== */
+        .teacher-panel {
+            width: 320px;
+            background: #0a111e;
+            border-right: 1px solid #1e293b;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .teacher-video-wrap {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+        .teacher-poster {
+            position: absolute; inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+        }
+        .teacher-poster img.bg-blur {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0.15;
+            filter: blur(20px);
+        }
+        .teacher-poster img.avatar {
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            border: 4px solid rgba(99,102,241,0.5);
+            box-shadow: 0 0 30px rgba(99,102,241,0.3);
+            object-fit: cover;
+            position: relative;
+        }
+        #teacherCamera {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        .teacher-label {
+            position: absolute;
+            bottom: 10px; left: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(8px);
+        }
+
+        /* ========== CONTROLS ========== */
+        .controls {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .ctrl-btn {
+            width: 50px; height: 50px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .ctrl-btn.on { background: var(--ec-primary, #4f46e5); box-shadow: 0 0 15px rgba(79,70,229,0.4); border-color: transparent; }
+        .ctrl-btn.danger { background: #ef4444; border-color: transparent; }
+        .ctrl-btn:hover { transform: translateY(-4px); background: rgba(255,255,255,0.2); }
+
+        /* ========== CENTER: STUDENT GRID ========== */
+        .grid-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        #studentGrid {
+            display: grid;
+            gap: 8px;
+            width: 100%;
+            height: 100%;
+            max-width: 900px;
+            max-height: 700px;
+        }
+
+        .student-cell {
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s ease;
+            aspect-ratio: 16/10;
+        }
+        /* Green = active */
+        .student-cell.active {
+            background: #0f172a;
+            border: 2px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .student-cell.speaking {
+            border-color: #10b981;
+            box-shadow: 0 0 15px rgba(16,185,129,0.4);
+        }
+        /* Red = registered but not online */
+        .student-cell.offline {
+            background: rgba(239, 68, 68, 0.05);
+            border: 2px dashed rgba(239, 68, 68, 0.2);
+        }
+        /* Empty slot */
+        .student-cell.empty {
+            background: #111827;
+            border: 1px dashed #1e293b;
+        }
+
+        .cell-avatar {
+            font-size: 28px;
+            color: rgba(255,255,255,0.5);
+            z-index: 1;
+        }
+        .cell-avatar.offline-icon { color: rgba(239,68,68,0.7); }
+
+        .cell-name {
+            position: absolute;
+            bottom: 6px; left: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(0,0,0,0.65);
+            padding: 3px 8px;
+            border-radius: 5px;
+            max-width: calc(100% - 30px);
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            z-index: 3;
+        }
+        .cell-name.me-label { color: #a5f3fc; }
+
+        .cell-mic {
+            position: absolute;
+            bottom: 6px; right: 6px;
+            font-size: 11px;
+            background: rgba(0,0,0,0.65);
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 3;
+        }
+        .cell-mic.mic-on { color: #fff; }
+        .cell-mic.mic-off { color: #ef4444; }
+
+        /* Camera feed in MY cell */
+        .cell-video {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 2;
+            display: none;
+        }
+
+        /* ========== RIGHT: SIDEBAR ========== */
+        .sidebar {
+            width: 240px;
+            background: #1e293b;
+            border-left: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .sidebar-header {
+            padding: 15px 16px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #334155;
+        }
+        .sidebar-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 8px;
+        }
+        .sidebar-list::-webkit-scrollbar { width: 4px; }
+        .sidebar-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+        .sidebar-student {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: background 0.2s;
+            cursor: default;
+        }
+        .sidebar-student:hover { background: rgba(255,255,255,0.05); }
+        .ss-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .ss-name { font-size: 13px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ss-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 6px #10b981;
+            animation: glow 2s infinite;
+        }
+        @keyframes glow { 0%,100%{ box-shadow: 0 0 4px #10b981; } 50%{ box-shadow: 0 0 10px #10b981; } }
+        .sidebar-empty { text-align: center; color: #475569; padding: 30px 10px; font-size: 13px; }
+
+        /* connection dot top-right */
+        .conn-status {
+            position: fixed;
+            top: 15px; right: 15px;
+            font-size: 11px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .conn-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+        .conn-dot.disconnected { background: #ef4444; }
+    </style>
+</head>
+<body>
+
+<!-- ====== PERMISSION OVERLAY (chỉ hiện khi bị từ chối) ====== -->
+<div id="permissionOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
+    <div class="perm-box" id="permBoxContent">
+        <div class="perm-spinner" id="permSpinner"></div>
+        <div class="perm-icon" id="permIcon" style="display:none"><i class="fa fa-video-camera"></i></div>
+        <h2 id="permTitle">Đang kết nối camera...</h2>
+        <p id="permDesc">Vui lòng cho phép trình duyệt truy cập Camera &amp; Micro khi được hỏi.</p>
+        <button class="btn-allow" id="btnRetry" style="display:none" onclick="requestPermissions()">
+            <i class="fa fa-refresh"></i> Thử lại
+        </button>
+        <br>
+        <button class="btn-skip" onclick="enterWithoutCamera()">
+            Tiếp tục mà không có camera / micro
+        </button>
+        <div class="perm-denied" id="permDeniedMsg"></div>
+    </div>
+</div>
+
+<!-- ====== HEADER ====== -->
+<div class="room-header">
+    <div class="room-title">
+        <i class="fa fa-graduation-cap" style="color:#6366f1;font-size:22px;"></i>
+        <div>
+            <div class="subject" th:text="${schedule != null ? schedule.monHoc : 'Lớp học ảo'}">Lớp học</div>
+            <div class="teacher-name">
+                Giáo viên: <span th:text="${schedule != null and schedule.giaoVien != null ? schedule.giaoVien.ten : '---'}"></span>
+                &nbsp;|&nbsp; <span id="myNameHeader" th:text="${username}"></span>
+            </div>
+        </div>
+    </div>
+    <div class="timer-badge" id="timerBadge">
+        <i class="fa fa-clock-o"></i> <span id="countdownDisplay">--:--</span>
+    </div>
+</div>
+
+<!-- ====== BODY ====== -->
+<div class="room-body">
+
+    <!-- LEFT: Teacher feed + controls -->
+    <div class="teacher-panel">
+        <div class="teacher-video-wrap">
+            <div class="rec-indicator">
+                <div class="rec-dot"></div> REC 00:00:24
+            </div>
+            <div class="teacher-poster" id="teacherPoster">
+                <img class="bg-blur"
+                     th:src="${classImage != null ? '/images/' + classImage : 'https://cdn-icons-png.flaticon.com/512/194/194931.png'}"
+                     alt="">
+                <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); text-align: center;">
+                    <img class="avatar"
+                         th:src="${classImage != null ? '/images/' + classImage : 'https://cdn-icons-png.flaticon.com/512/194/194931.png'}"
+                         alt="Teacher" style="width: 100px; height: 100px; margin-bottom: 10px;">
+                    <div style="font-weight: 700; color: #fff; font-size: 13px;">ĐANG TRUYỀN TẢI BÀI GIẢNG</div>
+                    <div style="font-size: 11px; color: #94a3b8;">Chế độ tập trung vào giáo viên</div>
+                </div>
+            </div>
+            <!-- This could be the real teacher stream source -->
+            <video id="teacherCamera" autoplay playsinline style="display: none;"></video>
+            
+            <div class="teacher-label">
+                <div class="live-tag">Live</div>
+                <span th:text="${schedule != null and schedule.giaoVien != null ? schedule.giaoVien.ten : 'Giáo viên EngCenter'}"></span>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="ctrl-btn on" id="btnMic" onclick="toggleMic()" title="Micro">
+                <i class="fa fa-microphone" id="micIcon"></i>
+            </button>
+            <button class="ctrl-btn on" id="btnCam" onclick="toggleCam()" title="Camera">
+                <i class="fa fa-video-camera" id="camIcon"></i>
+            </button>
+            <button class="ctrl-btn" id="btnScreen" onclick="toggleScreen()" title="Chia sẻ màn hình">
+                <i class="fa fa-desktop"></i>
+            </button>
+            <button class="ctrl-btn danger" onclick="leaveRoom()" title="Rời phòng">
+                <i class="fa fa-phone" style="transform:rotate(135deg)"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- CENTER: Student Grid -->
+    <div class="grid-panel">
+        <div id="studentGrid"></div>
+    </div>
+
+    <!-- RIGHT: Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">Đang tham gia (<span id="activeCount">0</span>)</div>
+        <div class="sidebar-list" id="sidebarList">
+            <div class="sidebar-empty">Chờ học sinh kết nối...</div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== DATA FROM SERVER (Thymeleaf) ====== -->
+<script th:inline="javascript">
+    const MY_NAME     = /*[[${username}]]*/ 'Bạn';
+    const SCHEDULE_ID = /*[[${scheduleId}]]*/ 0;
+    const ALL_STUDENTS = /*[[${allStudents}]]*/ [];   // tất cả đã đăng ký (DA_DONG)
+    const SI_SO       = /*[[${siSo != null ? siSo : 10}]]*/ 10;
+    let SECONDS_REMAINING = /*[[${secondsRemaining != null ? secondsRemaining : 2700}]]*/ 2700;
+</script>
+
+<script>
+    // =========================================================
+    // State
+    // =========================================================
+    let localStream = null;
+    let micOn = true;
+    let camOn = true;
+    let screenSharing = false;
+
+    let pingInterval   = null;
+    let pollInterval   = null;
+    let timerInterval  = null;
+
+    // Map username -> {micOn, camOn} for active students (from polling)
+    let activeMap = {};
+
+    // =========================================================
+    // PERMISSION FLOW
+    // =========================================================
+
+    // Auto-request on page load (like Google Meet)
+    window.addEventListener('load', function() {
+        autoRequestPermissions();
+    });
+
+    async function autoRequestPermissions() {
+        // Show the overlay with a spinner first (not blocking)
+        const overlay = document.getElementById('permissionOverlay');
+        overlay.style.display = 'flex';
+
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            // Permission granted → hide overlay and enter room immediately
+            overlay.style.display = 'none';
+            enterRoom();
+        } catch (err) {
+            console.warn('Auto permission request failed:', err.name, err.message);
+            // Show the overlay as a proper denied screen
+            showPermDenied(err);
+        }
+    }
+
+    async function requestPermissions() {
+        document.getElementById('permTitle').innerText = 'Đang kết nối...';
+        document.getElementById('permSpinner').style.display = 'block';
+        document.getElementById('permIcon').style.display = 'none';
+        document.getElementById('btnRetry').style.display = 'none';
+        document.getElementById('permDeniedMsg').innerText = '';
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            document.getElementById('permissionOverlay').style.display = 'none';
+            enterRoom();
+        } catch (err) {
+            showPermDenied(err);
+        }
+    }
+
+    function showPermDenied(err) {
+        const overlay = document.getElementById('permissionOverlay');
+        overlay.style.display = 'flex';
+        document.getElementById('permSpinner').style.display = 'none';
+        document.getElementById('permIcon').style.display = 'block';
+        document.getElementById('permDeniedMsg').style.display = 'block';
+
+        if (err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
+            document.getElementById('permTitle').innerText = 'Truy cập bị từ chối';
+            document.getElementById('permDesc').innerText =
+                'Bạn đã từ chối cấp quyền camera/micro. Vui lòng vào phần cài đặt trình duyệt để bật lại quyền, sau đó nhấn "Thử lại".';
+            document.getElementById('permDeniedMsg').innerText =
+                '⚙️ Chrome: Click vào biểu tượng khóa 🔒 bên trái thanh địa chỉ → Quyền → Cho phép Camera và Micro.';
+        } else if (err && err.name === 'NotFoundError') {
+            document.getElementById('permTitle').innerText = 'Không tìm thấy thiết bị';
+            document.getElementById('permDesc').innerText =
+                'Trình duyệt không tìm thấy camera hoặc micro. Kiểm tra kết nối thiết bị.'; 
+        } else {
+            document.getElementById('permTitle').innerText = 'Không thể kết nối';
+            document.getElementById('permDesc').innerText = 'Đã xảy ra lỗi khi kết nối thiết bị. Bạn có thể thử lại hoặc tiếp tục mà không có camera.';
+        }
+        document.getElementById('btnRetry').style.display = 'block';
+    }
+
+    function enterWithoutCamera() {
+        localStream = null;
+        micOn = false;
+        camOn = false;
+        document.getElementById('btnMic').classList.remove('on');
+        document.getElementById('btnMic').classList.add('danger');
+        document.getElementById('micIcon').className = 'fa fa-microphone-slash';
+        document.getElementById('btnCam').classList.remove('on');
+        document.getElementById('camIcon').className = 'fa fa-video-camera';
+        enterRoom();
+    }
+
+    function enterRoom() {
+        document.getElementById('permissionOverlay').style.display = 'none';
+
+        // NOTE: In a real system, teacherCamera would listen to a remote stream.
+        // We no longer assign student's localStream to teacher panel.
+        // If the teacher joined, their stream would go here.
+        
+        buildGrid();
+        startTimer();
+        startPing();
+        startPoll();
+    }
+
+    // =========================================================
+    // TIMER
+    // =========================================================
+    function startTimer() {
+        renderTimer(SECONDS_REMAINING);
+        timerInterval = setInterval(() => {
+            SECONDS_REMAINING--;
+            if (SECONDS_REMAINING <= 0) {
+                clearInterval(timerInterval);
+                alert('Đã kết thúc thời gian lớp học!');
+                leaveRoom();
+                return;
+            }
+            renderTimer(SECONDS_REMAINING);
+
+            const badge = document.getElementById('timerBadge');
+            if (SECONDS_REMAINING < 300) {
+                badge.classList.add('urgent');
+                badge.classList.remove('warning');
+            } else if (SECONDS_REMAINING < 600) {
+                badge.classList.add('warning');
+            }
+        }, 1000);
+    }
+
+    function renderTimer(sec) {
+        const m = Math.floor(sec / 60).toString().padStart(2, '0');
+        const s = (sec % 60).toString().padStart(2, '0');
+        document.getElementById('countdownDisplay').innerText = `${m}:${s}`;
+    }
+
+    // =========================================================
+    // PING – gửi trạng thái lên server mỗi 2s
+    // =========================================================
+    function startPing() {
+        sendPing(); // immediate
+        pingInterval = setInterval(sendPing, 2000);
+    }
+
+    function sendPing() {
+        const m = micOn ? 1 : 0;
+        const c = camOn ? 1 : 0;
+        fetch(`/student/api/room/${SCHEDULE_ID}/ping`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `micOn=${m}&camOn=${c}`
+        }).catch(() => {});
+    }
+
+    // =========================================================
+    // POLL – lấy danh sách active students mỗi 2s
+    // =========================================================
+    function startPoll() {
+        fetchActive(); // immediate
+        pollInterval = setInterval(fetchActive, 2000);
+    }
+
+    function fetchActive() {
+        fetch(`/student/api/room/${SCHEDULE_ID}/active`)
+            .then(r => r.json())
+            .then(data => {
+                // data = [{username, micOn, camOn}, ...]
+                const newMap = {};
+                data.forEach(s => { newMap[s.username] = s; });
+                activeMap = newMap;
+                updateGrid();
+                updateSidebar();
+            })
+            .catch(() => {});
+    }
+
+    // =========================================================
+    // GRID – build once, update on each poll
+    // =========================================================
+    function buildGrid() {
+        const grid = document.getElementById('studentGrid');
+        grid.innerHTML = '';
+
+        // Compute columns / rows
+        const cols = SI_SO <= 4 ? 2 : SI_SO <= 9 ? 3 : SI_SO <= 16 ? 4 : 5;
+        const rows = Math.ceil(SI_SO / cols);
+        grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+        for (let i = 0; i < SI_SO; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'student-cell empty';
+            cell.id = `cell-${i}`;
+            grid.appendChild(cell);
+        }
+
+        updateGrid();
+    }
+
+    function updateGrid() {
+        // Determine slots: 
+        // slot 0..N-1 mapped to ALL_STUDENTS (registered list)
+        // active ones get green, inactive get red, remaining slots empty
+
+        for (let i = 0; i < SI_SO; i++) {
+            const cell = document.getElementById(`cell-${i}`);
+            if (!cell) continue;
+
+            if (i < ALL_STUDENTS.length) {
+                const name = ALL_STUDENTS[i];
+                const isMe = (name === MY_NAME);
+                const isActive = !!activeMap[name];
+                const info = activeMap[name] || {};
+
+                if (isActive) {
+                    const isSpeaking = info.micOn !== false;
+                    cell.className = 'student-cell active' + (isSpeaking ? ' speaking' : '');
+                    cell.innerHTML = buildActiveCell(name, isMe, info);
+
+                    // Attach local camera stream to MY cell video
+                    if (isMe && localStream && camOn) {
+                        const vid = cell.querySelector('.cell-video');
+                        if (vid && !vid.srcObject) {
+                            vid.srcObject = localStream;
+                            vid.style.display = 'block';
+                        }
+                    }
+                } else {
+                    cell.className = 'student-cell offline';
+                    cell.innerHTML = `
+                        <i class="fa fa-user-times cell-avatar offline-icon"></i>
+                        <div class="cell-name">${escHtml(name)}</div>
+                    `;
+                }
+            } else {
+                // empty slot
+                cell.className = 'student-cell empty';
+                cell.innerHTML = '';
+            }
+        }
+    }
+
+    function buildActiveCell(name, isMe, info) {
+        const micClass = info.micOn !== false ? 'mic-on' : 'mic-off';
+        const micIcon  = info.micOn !== false ? 'fa-microphone' : 'fa-microphone-slash';
+        const nameClass = isMe ? 'cell-name me-label' : 'cell-name';
+        const label = isMe ? `${escHtml(name)} (Tôi)` : escHtml(name);
+
+        return `
+            <video class="cell-video" autoplay playsinline muted></video>
+            <i class="fa fa-user cell-avatar"></i>
+            <div class="${nameClass}">${label}</div>
+            <div class="cell-mic ${micClass}"><i class="fa ${micIcon}"></i></div>
+        `;
+    }
+
+    function escHtml(str) {
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // =========================================================
+    // SIDEBAR
+    // =========================================================
+    function updateSidebar() {
+        const list = document.getElementById('sidebarList');
+        const count = document.getElementById('activeCount');
+        const students = Object.values(activeMap);
+
+        count.innerText = students.length;
+
+        if (students.length === 0) {
+            list.innerHTML = '<div class="sidebar-empty">Chưa có học sinh nào...</div>';
+            return;
+        }
+
+        // Sort: ME first, then alphabetical
+        students.sort((a, b) => {
+            if (a.username === MY_NAME) return -1;
+            if (b.username === MY_NAME) return 1;
+            return a.username.localeCompare(b.username);
+        });
+
+        const colors = ['#4f46e5','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'];
+        list.innerHTML = students.map((s, idx) => {
+            const initial = s.username.charAt(0).toUpperCase();
+            const color = colors[idx % colors.length];
+            const label = s.username === MY_NAME ? `${escHtml(s.username)} (Tôi)` : escHtml(s.username);
+            return `
+                <div class="sidebar-student">
+                    <div class="ss-avatar" style="background:${color}">${initial}</div>
+                    <div class="ss-name">${label}</div>
+                    <div class="ss-dot"></div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // =========================================================
+    // CONTROLS
+    // =========================================================
+    function toggleMic() {
+        micOn = !micOn;
+        const btn = document.getElementById('btnMic');
+        const icon = document.getElementById('micIcon');
+        if (micOn) {
+            btn.className = 'ctrl-btn on';
+            icon.className = 'fa fa-microphone';
+        } else {
+            btn.className = 'ctrl-btn danger';
+            icon.className = 'fa fa-microphone-slash';
+        }
+        if (localStream) {
+            localStream.getAudioTracks().forEach(t => t.enabled = micOn);
+        }
+        // Icon in MY cell
+        updateMyCellMic();
+        sendPing();
+    }
+
+    function toggleCam() {
+        camOn = !camOn;
+        const btn = document.getElementById('btnCam');
+        const icon = document.getElementById('camIcon');
+        if (camOn) {
+            btn.className = 'ctrl-btn on';
+            icon.className = 'fa fa-video-camera';
+        } else {
+            btn.className = 'ctrl-btn';
+            icon.className = 'fa fa-video-camera';
+        }
+        if (localStream) {
+            localStream.getVideoTracks().forEach(t => t.enabled = camOn);
+        }
+        // Update left panel
+        const tv = document.getElementById('teacherCamera');
+        if (localStream) {
+            if (camOn) {
+                tv.style.display = 'block';
+                document.getElementById('teacherPoster').style.display = 'none';
+            } else {
+                tv.style.display = 'none';
+                document.getElementById('teacherPoster').style.display = 'flex';
+            }
+        }
+        // My cell video
+        const myIdx = ALL_STUDENTS.indexOf(MY_NAME);
+        if (myIdx >= 0) {
+            const cell = document.getElementById(`cell-${myIdx}`);
+            if (cell) {
+                const vid = cell.querySelector('.cell-video');
+                if (vid) {
+                    if (camOn && localStream) {
+                        vid.srcObject = localStream;
+                        vid.style.display = 'block';
+                    } else {
+                        vid.style.display = 'none';
+                    }
+                }
+            }
+        }
+        sendPing();
+    }
+
+    function updateMyCellMic() {
+        const myIdx = ALL_STUDENTS.indexOf(MY_NAME);
+        if (myIdx < 0) return;
+        const cell = document.getElementById(`cell-${myIdx}`);
+        if (!cell) return;
+        const micDiv = cell.querySelector('.cell-mic');
+        const micI = micDiv ? micDiv.querySelector('i') : null;
+        if (micDiv && micI) {
+            micDiv.className = `cell-mic ${micOn ? 'mic-on' : 'mic-off'}`;
+            micI.className = `fa ${micOn ? 'fa-microphone' : 'fa-microphone-slash'}`;
+        }
+    }
+
+    async function toggleScreen() {
+        if (screenSharing) {
+            // stop
+            if (localStream) {
+                const tv = document.getElementById('teacherCamera');
+                tv.srcObject = localStream;
+            }
+            screenSharing = false;
+            document.getElementById('btnScreen').classList.remove('on');
+            return;
+        }
+        try {
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            const tv = document.getElementById('teacherCamera');
+            tv.srcObject = screenStream;
+            tv.style.display = 'block';
+            document.getElementById('teacherPoster').style.display = 'none';
+            screenSharing = true;
+            document.getElementById('btnScreen').classList.add('on');
+            screenStream.getVideoTracks()[0].onended = () => {
+                screenSharing = false;
+                document.getElementById('btnScreen').classList.remove('on');
+                if (localStream && camOn) {
+                    tv.srcObject = localStream;
+                } else {
+                    tv.style.display = 'none';
+                    document.getElementById('teacherPoster').style.display = 'flex';
+                }
+            };
+        } catch(e) { console.warn('Screen share cancelled'); }
+    }
+
+    function leaveRoom() {
+        clearInterval(pingInterval);
+        clearInterval(pollInterval);
+        clearInterval(timerInterval);
+        if (localStream) localStream.getTracks().forEach(t => t.stop());
+        window.location.href = '/student/home';
+    }
+
+    // Leave ping on unload so server removes us quickly
+    window.addEventListener('beforeunload', () => {
+        // Send a sync beacon to "remove" ourselves (just stop pinging = server will timeout in 5s)
+        if (pingInterval) clearInterval(pingInterval);
+    });
+</script>
+</body>
+</html>

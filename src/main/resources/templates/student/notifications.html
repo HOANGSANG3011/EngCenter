@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Thông báo</title>
+</head>
+<body>
+
+<div class="container">
+    <h3>Thông báo</h3>
+
+    <div th:each="n : ${list}"
+         style="padding:15px; margin-bottom:10px; border-radius:8px;"
+         th:style="'background:' +
+            (n.status == 'SUCCESS' ? '#d1fae5' :
+            (n.status == 'WARNING' ? '#fef3c7' :
+            '#fee2e2'))">
+
+        <b th:text="${n.title}"></b><br>
+        <span th:text="${n.message}"></span><br>
+
+        <small th:text="${#temporals.format(n.createdAt,'dd/MM HH:mm')}"></small>
+        <br><br>
+
+        <!-- ✅ LINK LÀM QUIZ -->
+        <a th:if="${n.quiz != null}"
+           th:href="@{'/student/quiz/' + ${n.quiz.id}}"
+           style="color:blue; font-weight:bold;">
+            Làm bài →
+        </a>
+
+    </div>
+</div>
+
+</body>
+</html>

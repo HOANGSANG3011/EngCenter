@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Làm bài kiểm tra</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+</head>
+
+<body>
+
+<div class="container" style="margin-top:40px; margin-bottom: 60px; max-width: 800px;">
+
+    <div style="background: linear-gradient(135deg, #8B5CF6, #6D28D9); color: #fff; padding: 30px; border-radius: 16px 16px 0 0; text-align: center; box-shadow: 0 10px 20px rgba(139, 92, 246, 0.2); position: sticky; top: 0; z-index: 100;">
+        <h2 th:text="${quiz.title}" style="margin: 0; font-weight: 700; font-size: 28px;"></h2>
+        <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 15px;">
+            <i class="fa fa-info-circle"></i> Vui lòng chọn đáp án đúng nhất cho từng câu hỏi
+        </p>
+        <div th:if="${!isDone}" style="margin-top: 15px; background: rgba(255,255,255,0.2); display: inline-block; padding: 10px 25px; border-radius: 30px; font-weight: 800; font-size: 24px; letter-spacing: 2px;">
+            <i class="fa fa-clock-o"></i> <span id="timerDisplay">--:--</span>
+        </div>
+    </div>
+
+    <div style="background: #fff; padding: 40px; border-radius: 0 0 16px 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+        
+        <form id="quizForm">
+
+            <div th:each="q, iter : ${questions}" style="margin-bottom:30px; padding-bottom: 25px; border-bottom: 2px dashed #f1f5f9;">
+
+                <p style="font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 15px;">
+                    <span style="background: #EEF2FF; color: #4F46E5; padding: 4px 10px; border-radius: 8px; font-size: 14px; margin-right: 8px;">Câu <span th:text="${iter.count}"></span></span> 
+                    <span th:text="${q.content}"></span>
+                </p>
+
+                <div class="row">
+                    <div th:each="a : ${q.answers}" class="col-md-6" style="margin-bottom: 12px;">
+                        <label class="answer-label" style="display:block; padding: 12px 15px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-weight: 500; font-size: 15px;">
+                            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                <input type="radio"
+                                       th:name="'q' + ${q.id}"
+                                       th:value="${a.id}"
+                                       th:attr="data-correct=${a.correct}"
+                                       onclick="checkAnswer(this)"
+                                       style="margin-top: 4px; transform: scale(1.2);">
+                                <span th:text="${a.content}"></span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+        </form>
+
+        <div style="display: flex; gap: 15px; margin-top: 20px;" th:if="${!isDone}">
+            <button id="btnSubmit" class="btn btn-primary" type="button" onclick="submitQuiz()" style="flex: 2; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 10px; background: linear-gradient(135deg, #4F46E5, #3730A3); border: none; box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3);">
+                <i class="fa fa-paper-plane"></i> Hoàn thành & Nộp bài
+            </button>
+            <a th:href="@{'/student/quiz/downloadText_word?quizId=' + ${quiz.id}}" class="btn btn-info" style="flex: 1; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 10px; background: #e0f2fe; color: #0284c7; border: none; text-align: center; text-decoration: none; transition: all 0.2s;">
+                <i class="fa fa-download"></i> Tải File Word
+            </a>
+        </div>
+
+        <div id="resultBox" th:style="${isDone ? 'display:block' : 'display:none'}" style="background: linear-gradient(135deg, #ECFDF5, #D1FAE5); border: 2px solid #10B981; border-radius: 12px; padding: 25px; text-align: center; margin-top: 20px;">
+            <i class="fa fa-check-circle" style="font-size: 40px; color: #10B981; margin-bottom: 10px;"></i>
+            <h4 style="color: #065F46; font-weight: 700; margin-bottom: 5px;">Bạn đã hoàn thành bài kiểm tra!</h4>
+            <div style="font-size: 18px; color: #047857;">
+                Điểm số của bạn: <strong id="scoreText" style="font-size: 24px; color: #EF4444;" th:text="${resultScore}"></strong> / 10
+            </div>
+            <div id="correctCountText" style="font-weight: bold; margin-top: 10px; color: #059669;"></div>
+            
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;">
+                <a href="/student/quizzes" class="btn btn-success" style="border-radius: 8px; font-weight: 600;">
+                    <i class="fa fa-arrow-left"></i> Danh sách
+                </a>
+                <a href="/student/diem" class="btn" style="background: #10B981; color: #fff; border-radius: 8px; font-weight: 600;">
+                    <i class="fa fa-line-chart"></i> Xem điểm KT
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Anti-Cheat Overlay -->
+<div id="antiCheatOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; color: white;">
+    <i class="fa fa-warning" style="font-size: 80px; color: #ef4444; margin-bottom: 20px;"></i>
+    <h1 style="font-weight: 800; text-transform: uppercase;">Cảnh Báo Gian Lận!</h1>
+    <p style="font-size: 18px; max-width: 600px; text-align: center; opacity: 0.9;">
+        Bạn đã rời khỏi màn hình bài thi hoặc chuyển sang cửa sổ khác. Hiện tại hệ thống đã ghi nhận. Nếu vi phạm quá 3 lần, bài làm sẽ tự động bị huỷ.
+    </p>
+    <div style="font-size: 24px; font-weight: bold; color: #f59e0b; margin: 20px 0;">
+        Vi phạm lần: <span id="violationCount">0</span>/3
+    </div>
+    <button onclick="dismissCheatWarning()" style="padding: 12px 30px; font-size: 20px; font-weight: bold; background: #ef4444; border: none; border-radius: 8px; color: white; cursor: pointer; transition: 0.2s;">
+        Tôi đã hiểu, Quay lại làm bài
+    </button>
+</div>
+
+<style>
+    .answer-label:hover {
+        background: #F1F5F9 !important;
+        border-color: #CBD5E1 !important;
+    }
+    input[type="radio"]:checked + span {
+        font-weight: 700;
+        color: #4F46E5;
+    }
+</style>
+
+<script th:inline="javascript">
+    const isDone = /*[[${isDone}]]*/ false;
+    let cheatCount = 0;
+    
+    // Timer Logic
+    const timeLimitMinutes = /*[[${quiz.timeLimit != null ? quiz.timeLimit : 15}]]*/ 15;
+    let timeRemaining = timeLimitMinutes * 60; // seconds
+    let timerInterval = null;
+
+    if (isDone) {
+        // Disable forms
+        const inputs = document.querySelectorAll("input[type=radio]");
+        inputs.forEach(i => i.disabled = true);
+    } else {
+        startTimer();
+        setupAntiCheat();
+    }
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('timerDisplay').innerText = "00:00";
+                alert("Hết giờ làm bài! Hệ thống tự động nộp bài.");
+                submitQuiz();
+            } else {
+                let minutes = Math.floor(timeRemaining / 60);
+                let seconds = timeRemaining % 60;
+                let fmt = (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+                let display = document.getElementById('timerDisplay');
+                if(display) display.innerText = fmt;
+
+                if (timeRemaining <= 60) {
+                    display.style.color = "red";
+                }
+                timeRemaining--;
+            }
+        }, 1000);
+    }
+
+    // Anti-cheat Logic
+    let antiCheatActive = false;
+
+    function visibilityHandler() {
+        if (document.visibilityState === 'hidden') {
+            triggerCheatWarning();
+        }
+    }
+
+    function setupAntiCheat() {
+        antiCheatActive = true;
+        window.addEventListener('blur', triggerCheatWarning);
+        document.addEventListener('visibilitychange', visibilityHandler);
+    }
+
+    function teardownAntiCheat() {
+        antiCheatActive = false;
+        window.removeEventListener('blur', triggerCheatWarning);
+        document.removeEventListener('visibilitychange', visibilityHandler);
+    }
+
+    function triggerCheatWarning() {
+        if (isDone || cheatCount >= 3) return; 
+        
+        // Remove event listeners temporarily to prevent duplicate firing
+        window.removeEventListener('blur', triggerCheatWarning);
+        
+        cheatCount++;
+        document.getElementById('violationCount').innerText = cheatCount;
+        document.getElementById('antiCheatOverlay').style.display = 'flex';
+        
+        if (cheatCount >= 3) {
+            alert("Bạn đã vi phạm quy chế thi quá 3 lần. Bài làm sẽ được tự động nộp.");
+            submitQuiz();
+        }
+    }
+
+    function dismissCheatWarning() {
+        document.getElementById('antiCheatOverlay').style.display = 'none';
+        // restore event listener after a brief timeout to avoid immediate refire
+        setTimeout(() => {
+            window.addEventListener('blur', triggerCheatWarning);
+        }, 500);
+    }
+
+    function checkAnswer(input) {
+        // Do nothing on click for color change, wait till submit
+    }
+
+    function submitQuiz() {
+        if (isDone) return;
+        clearInterval(timerInterval); // Stop timer
+        
+        const form = document.getElementById('quizForm');
+        let correctCount = 0;
+        let totalQuestions = 0;
+
+        const allQuestions = Array.from(form.children).filter(el => el.tagName === 'DIV'); 
+
+        allQuestions.forEach(qDiv => {
+            totalQuestions++;
+            const radios = qDiv.querySelectorAll('input[type=radio]');
+            let answeredCorrectly = false;
+
+            radios.forEach(r => {
+                if (r.checked && r.getAttribute('data-correct') === 'true') {
+                    answeredCorrectly = true;
+                    correctCount++;
+                }
+            });
+
+            // Highlight tất cả màu đúng sai
+            radios.forEach(r => {
+                if (r.getAttribute('data-correct') === 'true') {
+                    r.parentElement.style.color = "green";
+                    r.parentElement.style.fontWeight = "bold";
+                } else if (r.checked && r.getAttribute('data-correct') === 'false') {
+                    r.parentElement.style.color = "red";
+                }
+                r.disabled = true;
+            });
+        });
+
+        if (totalQuestions === 0) totalQuestions = 1;
+
+        const score = (correctCount / totalQuestions) * 10;
+        
+        // Update Result Box in DOM
+        document.getElementById('scoreText').innerText = score.toFixed(2);
+        document.getElementById('correctCountText').innerText = "Số câu trả lời đúng: " + correctCount + " / " + totalQuestions;
+        document.getElementById('resultBox').style.display = 'block';
+        
+        let btnSubmit = document.getElementById('btnSubmit');
+        if(btnSubmit) btnSubmit.style.display = 'none';
+        
+        teardownAntiCheat(); // Tháo bỏ hoàn toàn anti-cheat sau khi nộp bài
+
+        alert("Bạn đã trả lời đúng " + correctCount + "/" + totalQuestions + " câu.\nĐiểm số: " + score.toFixed(2));
+
+        const quizId = /*[[${quiz.id}]]*/ 0;
+
+        // Submit form data to backend
+        fetch(`/student/quiz/submit`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `quizId=${quizId}&score=${score.toFixed(2)}`
+        })
+        .then(response => {
+            if (response.ok) {
+                // Done
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

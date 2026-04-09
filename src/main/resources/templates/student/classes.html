@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách lớp - EngCenter</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/engcenter-design.css}">
+</head>
+
+<body class="ec-body" id="top" data-spy="scroll" data-target=".navbar-collapse" data-offset="50">
+
+    <!-- NAVBAR -->
+    <section class="navbar ec-navbar navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon icon-bar"></span>
+                    <span class="icon icon-bar"></span>
+                    <span class="icon icon-bar"></span>
+                </button>
+                <a href="/student/home" class="navbar-brand">
+                    <span class="ec-brand-icon" style="background: linear-gradient(135deg, var(--ec-secondary), var(--ec-primary));"><i class="fa fa-graduation-cap"></i></span>
+                    <span class="ec-brand-accent">Student Portal</span>
+                </a>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="/student/home"><i class="fa fa-home"></i> Trang chủ</a></li>
+                    <li><a href="/student/my-classes"><i class="fa fa-book"></i> Lớp của tôi</a></li>
+                    <li class="ec-nav-logout">
+                        <a href="/logout"><i class="fa fa-sign-out"></i> Đăng xuất</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <div class="container ec-main-content">
+        <!-- INLINE WARNING -->
+        <div th:if="${warning}" class="ec-animate-fadeIn" style="margin-bottom: 24px;">
+            <div class="ec-card-glass" style="padding: 16px 20px; border-left: 4px solid var(--ec-accent); display: flex; align-items: center; gap: 16px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--ec-accent-light); color: var(--ec-accent-dark); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">
+                    <i class="fa fa-exclamation-triangle"></i>
+                </div>
+                <div>
+                    <h5 style="margin: 0 0 2px 0; font-weight: 700; color: var(--ec-text);">Thông báo</h5>
+                    <p style="margin: 0; color: var(--ec-text-light); font-size: 14px;" th:text="${warning}"></p>
+                </div>
+                <button type="button" class="close" data-dismiss="alert" style="margin-left: auto; outline: none; opacity: 0.5;">&times;</button>
+            </div>
+        </div>
+
+        <div class="ec-panel ec-animate-fadeInUp">
+            <div class="ec-panel-header">
+                <h4><i class="fa fa-list-ul" style="color: var(--ec-primary); margin-right: 8px;"></i> Danh sách lớp học</h4>
+                <span class="ec-badge ec-badge-primary">
+                    <i class="fa fa-book" style="margin-right: 4px;"></i> Các lớp đang mở
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="ec-table">
+                    <thead>
+                        <tr>
+                            <th>Tên lớp</th>
+                            <th>Giáo viên</th>
+                            <th style="text-align: center;">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="lh : ${list}">
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 14px;">
+                                    <img th:src="@{/images/{img}(img=${lh.hinhAnh})}"
+                                         width="48" height="48"
+                                         style="border-radius: 12px; object-fit: cover; border: 2px solid var(--ec-border-light);">
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--ec-text);" th:text="${lh.tenLop}"></div>
+                                        <small style="color: var(--ec-text-muted);">
+                                            <i class="fa fa-calendar" style="margin-right: 4px;"></i>
+                                            <span th:text="${#temporals.format(lh.ngayHoc,'dd/MM/yyyy')}"></span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-weight: 500;">
+                                        <i class="fa fa-user" style="color: var(--ec-primary); margin-right: 4px;"></i>
+                                        <span th:text="${lh.giaoVien?.ten}"></span>
+                                    </span>
+                                    <span style="color: var(--ec-accent); font-size: 13px;">
+                                        <i class="fa fa-star"></i>
+                                        <span th:text="${lh.avgRating != null ? lh.avgRating : 0}"></span>
+                                    </span>
+                                </div>
+                            </td>
+                            <td style="text-align: center;">
+                                <a th:href="@{/student/register/{id}(id=${lh.id})}"
+                                   class="ec-btn ec-btn-primary ec-btn-sm">
+                                    <i class="fa fa-pencil"></i> Đăng ký
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 24px; display: flex; gap: 16px; flex-wrap: wrap;">
+                <a href="/student/my-classes" style="color: var(--ec-primary); font-weight: 600; font-size: 14px; text-decoration: none; transition: all 0.3s;">
+                    <i class="fa fa-list" style="margin-right: 4px;"></i> Xem lớp đã đăng ký
+                </a>
+                <a href="/student/home" style="color: var(--ec-text-muted); font-weight: 500; font-size: 14px; text-decoration: none; transition: all 0.3s;">
+                    <i class="fa fa-arrow-left" style="margin-right: 4px;"></i> Quay lại Trang chủ
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/jquery.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+
+</body>
+
+</html>

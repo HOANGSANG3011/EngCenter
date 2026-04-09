@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(content)">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal - EngCenter</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/engcenter-design.css}">
+</head>
+
+<body class="ec-body">
+
+<!-- NAVBAR -->
+<section class="navbar ec-navbar navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+            </button>
+            <a href="/student/home" class="navbar-brand">
+                <span class="ec-brand-icon" style="background: linear-gradient(135deg, var(--ec-secondary), var(--ec-primary));"><i class="fa fa-graduation-cap"></i></span>
+                <span class="ec-brand-accent">Student Portal</span>
+            </a>
+        </div>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/student/profile"><i class="fa fa-user-circle"></i> Hồ sơ</a></li>
+                <li><a href="/student/classes"><i class="fa fa-pencil-square-o"></i> Đăng ký</a></li>
+                <li><a href="/student/schedule"><i class="fa fa-calendar"></i> Lịch học</a></li>
+                <li><a href="/student/quizzes"><i class="fa fa-list-alt"></i> Bài kiểm tra</a></li>
+                <li><a href="/student/diem"><i class="fa fa-line-chart"></i> Điểm</a></li>
+                <li><a href="/student/my-classes"><i class="fa fa-credit-card"></i> Học phí</a></li>
+                <li class="ec-nav-logout ec-shake-hover">
+                    <a href="/logout" class="ec-pulse-active"><i class="fa fa-sign-out"></i> Đăng xuất</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<div class="container ec-main-content">
+    <div th:replace="${content}"></div>
+</div>
+
+<script th:src="@{/js/jquery.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/custom-effects.js}"></script>
+
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Home - EngCenter</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/engcenter-design.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .ec-stat-card {
+            border-bottom: 4px solid var(--ec-primary);
+        }
+        .ec-stat-card-accent { border-bottom-color: var(--ec-accent); }
+        .ec-stat-card-success { border-bottom-color: var(--ec-success); }
+        .ec-stat-card-secondary { border-bottom-color: var(--ec-secondary); }
+    </style>
+</head>
+
+<body class="ec-body" id="top" data-spy="scroll" data-target=".navbar-collapse" data-offset="50">
+
+    <!-- NAVBAR -->
+    <section class="navbar ec-navbar navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon icon-bar"></span>
+                    <span class="icon icon-bar"></span>
+                    <span class="icon icon-bar"></span>
+                </button>
+                <a href="/student/home" class="navbar-brand">
+                    <span class="ec-brand-icon" style="background: linear-gradient(135deg, var(--ec-secondary), var(--ec-primary));"><i class="fa fa-graduation-cap"></i></span>
+                    <span class="ec-brand-accent">Student Portal</span>
+                </a>
+            </div>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                
+                <!-- Notification Bell -->
+                <li class="dropdown ec-shake-hover">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="position: relative;">
+                        <i class="fa fa-bell" style="font-size: 18px;"></i>
+                        <span th:if="${soThongBaoChuaDoc > 0}" th:text="${soThongBaoChuaDoc}" class="badge" style="background: red; position: absolute; top: 10px; right: 5px; font-size: 10px; padding: 3px 6px;"></span>
+                    </a>
+                    <ul class="dropdown-menu" style="width: 320px; padding: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 12px; border: none; overflow: hidden; max-height: 400px; overflow-y: auto;">
+                        <li style="padding: 15px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: #1e293b;">
+                            Thông báo của bạn
+                        </li>
+                        <li th:if="${#lists.isEmpty(notifications)}" style="padding: 20px; text-align: center; color: #64748b;">
+                            Không có thông báo mới
+                        </li>
+                        <li th:each="n : ${notifications}" style="border-bottom: 1px solid #f1f5f9;">
+                            <a href="#" th:onclick="'markAsRead(this, ' + ${n.id} + ')'" style="padding: 12px 15px; white-space: normal; transition: background 0.2s; display: block;">
+                                <div style="display: flex; gap: 10px;">
+                                    <div style="flex-shrink: 0; color: #8B5CF6; font-size: 20px;">
+                                        <i class="fa" th:classappend="${n.type == 'KIEM_TRA' ? 'fa-file-text-o' : (n.type == 'NHAC_NO' ? 'fa-exclamation-circle' : 'fa-info-circle')}"></i>
+                                    </div>
+                                    <div>
+                                        <strong th:text="${n.title}" style="color: #1e293b; font-size: 14px; display: block; margin-bottom: 4px;"></strong>
+                                        <span th:text="${n.message}" style="color: #64748b; font-size: 13px; display: block;"></span>
+                                        <div style="font-size: 11px; color: #94a3b8; margin-top: 5px;" th:text="${#temporals.format(n.createdAt, 'dd/MM/yyyy HH:mm')}"></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li style="margin-left: 10px;">
+                    <a href="/logout" class="ec-color-animate" style="border-radius: 8px; padding: 8px 16px; font-weight: bold; display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                        <i class="fa fa-sign-out"></i> Đăng xuất
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<script>
+    function markAsRead(element, notifId) {
+        // Hide the notification row visually
+        element.parentElement.style.display = 'none';
+        
+        // Update unread count visually
+        let badge = document.querySelector('.fa-bell').nextElementSibling;
+        if(badge) {
+            let count = parseInt(badge.innerText);
+            if(count > 1) {
+                badge.innerText = count - 1;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+        
+        // Let's assume there is an endpoint to mark as read, or just fake it for UI requested
+        // Example: fetch('/student/notification/read?id=' + notifId)
+     <div class="container ec-main-content">
+        
+        <!-- Welcome Banner -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="ec-dashboard-banner ec-animate-fadeInUp" style="padding: 40px; margin-bottom: 30px;">
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="width: 70px; height: 70px; border-radius: 18px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; font-size: 30px; color: #fff;">
+                            <i class="fa fa-mortar-board"></i>
+                        </div>
+                        <div>
+                            <h1 style="font-size: 32px; margin-bottom: 4px; color: #fff;">Chào mừng trở lại, <span th:text="${session.user.username}">Học viên</span>!</h1>
+                            <p style="font-size: 16px; opacity: 0.9; color: #fff; margin: 0;">Bạn đã sẵn sàng cho buổi học tiếp theo chưa? Kiểm tra tiến độ học tập bên dưới nhé.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Cards -->
+        <div class="row ec-animate-fadeInUp ec-animate-delay-1">
+            <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+                <div class="ec-stat-card ec-stat-card-primary">
+                    <div class="ec-stat-icon ec-stat-icon-primary">
+                        <i class="fa fa-book"></i>
+                    </div>
+                    <div class="ec-stat-info">
+                        <h4>Lớp đã đăng ký</h4>
+                        <span class="ec-stat-value">[[${soLuongList != null ? #aggregates.sum(soLuongList) : 0}]]</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+                <div class="ec-stat-card ec-stat-card-success">
+                    <div class="ec-stat-icon ec-stat-icon-success">
+                        <i class="fa fa-star"></i>
+                    </div>
+                    <div class="ec-stat-info">
+                        <h4>GPA Dự kiến</h4>
+                        <span class="ec-stat-value">9.2</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+                <div class="ec-stat-card ec-stat-card-accent">
+                    <div class="ec-stat-icon ec-stat-icon-accent">
+                        <i class="fa fa-bell"></i>
+                    </div>
+                    <div class="ec-stat-info">
+                        <h4>Thông báo mới</h4>
+                        <span class="ec-stat-value" th:text="${soThongBaoChuaDoc}">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+                <div class="ec-stat-card ec-stat-card-secondary">
+                    <div class="ec-stat-icon ec-stat-icon-secondary">
+                        <i class="fa fa-clock-o"></i>
+                    </div>
+                    <div class="ec-stat-info">
+                        <h4>Giờ học đã tích lũy</h4>
+                        <span class="ec-stat-value">124h</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row ec-animate-fadeInUp ec-animate-delay-2" style="margin-top: 10px;">
+            <div class="col-md-8" style="margin-bottom: 20px;">
+                <div class="ec-panel">
+                    <div class="ec-panel-header">
+                        <h4><i class="fa fa-line-chart" style="color: var(--ec-primary); margin-right: 8px;"></i> Xu hướng học tập (Đăng ký theo tháng)</h4>
+                    </div>
+                    <div style="padding: 15px;">
+                        <canvas id="studentBarChart" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4" style="margin-bottom: 20px;">
+                <div class="ec-panel">
+                    <div class="ec-panel-header">
+                        <h4><i class="fa fa-pie-chart" style="color: var(--ec-secondary); margin-right: 8px;"></i> Chuyên môn giáo viên</h4>
+                    </div>
+                    <div style="padding: 15px;">
+                        <canvas id="studentPieChart" height="340"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Utility Buttons -->
+        <div class="row ec-animate-fadeInUp ec-animate-delay-3" style="margin-top: 10px;">
+            <div class="col-md-12">
+                <div class="ec-panel" style="padding: 30px; background: #fff;">
+                    <h3 style="margin-top: 0; margin-bottom: 25px; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 10px;">
+                        <i class="fa fa-rocket" style="color: var(--ec-accent);"></i> Lối tắt nhanh
+                    </h3>
+                    <div class="row">
+                        <div class="col-sm-4" style="margin-bottom: 16px;">
+                            <a href="/student/classes" class="ec-btn ec-btn-primary" style="width: 100%; justify-content: center; padding: 16px 20px; border-radius: 12px;">
+                                <i class="fa fa-search"></i> Tìm kiếm & Đăng ký lớp
+                            </a>
+                        </div>
+                        <div class="col-sm-4" style="margin-bottom: 16px;">
+                            <a href="/student/my-classes" class="ec-btn ec-btn-success" style="width: 100%; justify-content: center; padding: 16px 20px; border-radius: 12px;">
+                                <i class="fa fa-graduation-cap"></i> Khóa học của tôi
+                            </a>
+                        </div>
+                        <div class="col-sm-4" style="margin-bottom: 16px;">
+                            <a href="/student/schedule" class="ec-btn ec-btn-warning" style="width: 100%; justify-content: center; padding: 16px 20px; border-radius: 12px;">
+                                <i class="fa fa-calendar-check-o"></i> Lịch học sắp tới
+                            </a>
+                        </div>
+                        <div class="col-sm-4" style="margin-bottom: 16px;">
+                            <a href="/student/quizzes" class="ec-btn" style="width: 100%; justify-content: center; padding: 16px 20px; border-radius: 12px; background: linear-gradient(135deg, #10B981, #059669); color: white;">
+                                <i class="fa fa-pencil-square-o"></i> Trung tâm bài thi
+                            </a>
+                        </div>
+                        <div class="col-sm-4" style="margin-bottom: 16px;">
+                            <a href="/student/profile" class="ec-btn" style="width: 100%; justify-content: center; padding: 16px 20px; border-radius: 12px; background: linear-gradient(135deg, #8B5CF6, #6366F1); color: white;">
+                                <i class="fa fa-user"></i> Cài đặt cá nhân
+                            </a>
+                        </div>
+                        <div class="col-sm-4" style="margin-bottom: 16px;">
+                            <button onclick="checkThanhToan()" class="ec-btn" style="width: 100%; justify-content: center; padding: 16px 20px; border-radius: 12px; background: linear-gradient(135deg, #F59E0B, #D97706); color: white;">
+                                <i class="fa fa-credit-card"></i> Thanh toán học phí
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+              </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cảnh báo Thanh toán Modal -->
+    <div id="paymentAlert" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050; align-items: center; justify-content: center;">
+        <div style="background: #fff; padding: 30px; border-radius: 12px; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: fadein 0.3s forwards;">
+            <i class="fa fa-exclamation-triangle" style="font-size: 50px; color: #F59E0B; margin-bottom: 15px;"></i>
+            <h3 style="margin-top: 0; color: #1e293b; font-weight: 700;">Chưa thể thanh toán!</h3>
+            <p style="color: #64748b; font-size: 15px; margin-bottom: 25px;">Yêu cầu đăng ký của bạn chưa được duyệt hoặc bạn chưa có khoản phí nào cần đóng. Vui lòng chờ trung tâm xác nhận.</p>
+            <button onclick="document.getElementById('paymentAlert').style.display='none'" class="ec-btn ec-btn-primary" style="padding: 10px 30px;">Đóng</button>
+        </div>
+    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/jquery.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:inline="javascript">
+        function checkThanhToan() {
+            document.getElementById('paymentAlert').style.display = 'flex';
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Data from model
+            const thang = /*[[${thangList}]]*/ [];
+            const soLuong = /*[[${soLuongList}]]*/ [];
+            
+            // Monthly Registration Chart (Line)
+            if (thang && thang.length > 0) {
+                new Chart(document.getElementById('studentBarChart'), {
+                    type: 'line',
+                    data: {
+                        labels: thang.map(t => "T" + t),
+                        datasets: [{
+                            label: 'Lớp đã đăng ký',
+                            data: soLuong,
+                            borderColor: '#4F46E5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#4F46E5'
+                        }]
+                    },
+                    options: {
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.03)' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            const monLabels = /*[[${monList}]]*/ [];
+            const monCounts = /*[[${soLuongGiaoVienList}]]*/ [];
+            
+            // Teacher Specialization Chart (Doughnut)
+            if (monLabels && monLabels.length > 0) {
+                new Chart(document.getElementById('studentPieChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: monLabels,
+                        datasets: [{
+                            data: monCounts,
+                            backgroundColor: ['#4F46E5', '#06B6D4', '#F59E0B', '#10B981', '#EC4899'],
+                            borderWidth: 0,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        cutout: '75%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { padding: 20, usePointStyle: true, font: { family: 'Inter', size: 12 } }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+
+</html>

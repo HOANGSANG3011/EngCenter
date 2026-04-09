@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="student/layout :: layout(~{::section})">
+
+<section>
+    <style>
+        .quiz-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border-left: 5px solid var(--ec-primary);
+            transition: transform 0.3s;
+        }
+
+        .quiz-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .quiz-teacher {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .badge-score {
+            background: #dcfce7;
+            color: #166534;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .btn-modern {
+            background: linear-gradient(135deg, var(--ec-primary), var(--ec-secondary));
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-modern:hover {
+            opacity: 0.9;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-section {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 15px;
+        }
+        
+        .header-section h2 {
+            font-weight: 800;
+            color: #1e293b;
+        }
+    </style>
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            
+            <div class="header-section">
+                <h2><i class="fa fa-list-alt" style="color: var(--ec-primary); margin-right: 10px;"></i> Bài kiểm tra của tôi</h2>
+                <p class="text-muted" style="font-size: 15px;">Danh sách tất cả các bài kiểm tra được giao từ giáo viên của bạn</p>
+            </div>
+
+            <div th:if="${quizzes == null || quizzes.isEmpty()}" class="alert alert-info" style="border-radius: 8px;">
+                <i class="fa fa-info-circle"></i> Bạn chưa có bài kiểm tra nào.
+            </div>
+
+            <div th:each="quiz : ${quizzes}" class="quiz-card animate__animated animate__fadeInUp">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="quiz-title" th:text="${quiz.title}"></div>
+                        <div class="quiz-teacher">
+                            <i class="fa fa-user" style="margin-right: 5px;"></i> 
+                            Giáo viên: <b th:text="${quiz.teacher.ten}"></b>
+                        </div>
+                    </div>
+                    
+                    <div class="col-sm-4 text-right" style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                        <div th:if="${quizScores[quiz.id] != null}" style="margin-bottom: 10px;">
+                            <span class="badge-score">
+                                <i class="fa fa-check-circle"></i> Điểm: <span th:text="${quizScores[quiz.id]}"></span> / 10
+                            </span>
+                        </div>
+                        <div th:if="${quizScores[quiz.id] == null}" style="margin-bottom: 10px;">
+                            <span class="badge" style="background: #fef3c7; color: #92400e; padding: 5px 10px; border-radius: 20px;">
+                                <i class="fa fa-clock-o"></i> Chưa làm
+                            </span>
+                        </div>
+                        
+                        <div>
+                            <a th:if="${quizScores[quiz.id] == null}" th:href="@{'/student/quiz/' + ${quiz.id}}" class="btn-modern" style="background: linear-gradient(135deg, #10B981, #059669);">
+                                <i class="fa fa-play-circle"></i> Làm bài kiểm tra
+                            </a>
+                            <a th:if="${quizScores[quiz.id] != null}" th:href="@{/student/diem}" class="btn-modern" style="background: linear-gradient(135deg, #6366F1, #4338CA);">
+                                <i class="fa fa-line-chart"></i> Xem điểm
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+</html>

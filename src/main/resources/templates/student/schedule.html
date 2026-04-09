@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thời khóa biểu - EngCenter</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/engcenter-design.css}">
+
+    <style>
+        .schedule-box {
+            border-radius: 8px;
+            padding: 8px;
+            color: white;
+            margin-bottom: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .schedule-box:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+
+<body class="ec-body" id="top">
+
+    <!-- NAVBAR -->
+    <section class="navbar ec-navbar navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon icon-bar"></span>
+                    <span class="icon icon-bar"></span>
+                    <span class="icon icon-bar"></span>
+                </button>
+                <a href="/student/home" class="navbar-brand">
+                    <span class="ec-brand-icon" style="background: linear-gradient(135deg, var(--ec-secondary), var(--ec-primary));"><i class="fa fa-graduation-cap"></i></span>
+                    <span class="ec-brand-accent">Student Portal</span>
+                </a>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="/student/home"><i class="fa fa-home"></i> Trang chủ</a></li>
+                    <li><a href="/student/classes"><i class="fa fa-list-ul"></i> Lớp học</a></li>
+                    <li><a href="/student/my-classes"><i class="fa fa-book"></i> Lớp của tôi</a></li>
+                    <li class="active"><a href="/student/schedule"><i class="fa fa-calendar"></i> Lịch học</a></li>
+                    <li class="ec-nav-logout">
+                        <a href="/logout"><i class="fa fa-sign-out"></i> Đăng xuất</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <div class="container ec-main-content">
+        <div class="ec-panel ec-animate-fadeInUp">
+            
+            <div class="ec-panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <h4><i class="fa fa-calendar" style="color: var(--ec-primary); margin-right: 8px;"></i> Thời khóa biểu Trung Tâm</h4>
+                <div style="display:flex; align-items:center; gap: 15px;">
+                    <a th:href="@{/student/schedule(weekOffset=${weekOffset - 1})}" class="ec-btn ec-btn-sm" style="background:#f1f5f9; color:#475569;">
+                        <i class="fa fa-chevron-left"></i> Tuần trước
+                    </a>
+                    
+                    <span style="font-weight:600; color: var(--ec-text);">
+                        Tuần (<span th:text="${#temporals.format(startWeek,'dd/MM')}"></span> - <span th:text="${#temporals.format(endWeek,'dd/MM')}"></span>)
+                    </span>
+
+                    <a th:href="@{/student/schedule(weekOffset=${weekOffset + 1})}" class="ec-btn ec-btn-sm" style="background:#f1f5f9; color:#475569;">
+                        Tuần sau <i class="fa fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-responsive" style="margin-top:20px;">
+                <table class="ec-table table-bordered">
+                    <thead>
+                    <tr>
+                        <th style="width: 100px; text-align:center;">Buổi</th>
+                        <th th:each="d : ${days}" th:text="${d}" style="text-align:center;"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <!-- ===== SÁNG ===== -->
+                        <tr>
+                            <td class="session-col">🌅 Sáng</td>
+                            <td th:each="d : ${days}" style="vertical-align:top;">
+                                <div th:each="s : ${schedules}"
+                                     th:if="${s.thu == d and s.buoi == 'SANG'}"
+                                     class="schedule-box"
+                                     th:style="'background: linear-gradient(135deg, hsl(' + (${s.giaoVien != null ? s.giaoVien.id : 1} * 50 % 360) + ', 70%, 60%), hsl(' + (${s.giaoVien != null ? s.giaoVien.id : 1} * 50 % 360) + ', 60%, 50%))'"
+                                     th:onclick="showDetails([[${s.monHoc}]], [[${s.giaoVien != null ? s.giaoVien.ten : 'Chưa xếp GV'}]], [[${s.tietBatDau}]], [[${s.tietKetThuc}]], 'Sáng', [[${d}]], [[${s.id}]])">
+
+                                    <div style="font-weight: 700; font-size: 14px; margin-bottom: 2px;" th:text="${s.giaoVien != null ? s.giaoVien.ten : 'Chưa xếp GV'}"></div>
+                                    <div style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; display: inline-block; font-size: 11px; margin-bottom: 4px;" th:text="${s.monHoc}"></div>
+                                    <div th:if="${isFullMap[s.id]}" style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; display: inline-block; font-size: 10px; font-weight: bold; margin-left: 5px; animation: pulse 2s infinite;">
+                                        <i class="fa fa-users"></i> Lớp đã đầy
+                                    </div><br>
+                                    
+                                    <div style="font-size: 11px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 4px; margin-top: 2px;">
+                                        <i class="fa fa-clock-o"></i> 
+                                        <span th:text="${T(com.hutech.TrungTamTiengAnh.controller.ScheduleController).getStartTime(s.tietBatDau).toString() + ' - ' + T(com.hutech.TrungTamTiengAnh.controller.ScheduleController).getEndTime(s.tietKetThuc).toString()}"></span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- ===== CHIỀU ===== -->
+                        <tr>
+                            <td class="session-col">🌇 Chiều</td>
+                            <td th:each="d : ${days}" style="vertical-align:top;">
+                                <div th:each="s : ${schedules}"
+                                     th:if="${s.thu == d and s.buoi == 'CHIEU'}"
+                                     class="schedule-box"
+                                     style="background: linear-gradient(135deg, #F59E0B, #D97706)"
+                                     th:onclick="showDetails([[${s.monHoc}]], [[${s.giaoVien != null ? s.giaoVien.ten : 'Chưa xếp GV'}]], [[${s.tietBatDau}]], [[${s.tietKetThuc}]], 'Chiều', [[${d}]], [[${s.id}]])">
+
+                                    <div style="font-weight: 700; font-size: 14px; margin-bottom: 2px;" th:text="${s.giaoVien != null ? s.giaoVien.ten : 'Chưa xếp GV'}"></div>
+                                    <div style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; display: inline-block; font-size: 11px; margin-bottom: 4px;" th:text="${s.monHoc}"></div>
+                                    <div th:if="${isFullMap[s.id]}" style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; display: inline-block; font-size: 10px; font-weight: bold; margin-left: 5px; animation: pulse 2s infinite;">
+                                        <i class="fa fa-users"></i> Lớp đã đầy
+                                    </div><br>
+                                    
+                                    <div style="font-size: 11px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 4px; margin-top: 2px;">
+                                        <i class="fa fa-clock-o"></i> 
+                                        <span th:text="${T(com.hutech.TrungTamTiengAnh.controller.ScheduleController).getStartTime(s.tietBatDau).toString() + ' - ' + T(com.hutech.TrungTamTiengAnh.controller.ScheduleController).getEndTime(s.tietKetThuc).toString()}"></span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- ===== TỐI ===== -->
+                        <tr>
+                            <td class="session-col">🌙 Tối</td>
+                            <td th:each="d : ${days}" style="vertical-align:top;">
+                                <div th:each="s : ${schedules}"
+                                     th:if="${s.thu == d and s.buoi == 'TOI'}"
+                                     class="schedule-box"
+                                     style="background: linear-gradient(135deg, #4F46E5, #3730A3)"
+                                     th:onclick="showDetails([[${s.monHoc}]], [[${s.giaoVien != null ? s.giaoVien.ten : 'Chưa xếp GV'}]], [[${s.tietBatDau}]], [[${s.tietKetThuc}]], 'Tối', [[${d}]], [[${s.id}]])">
+
+                                    <div style="font-weight: 700; font-size: 14px; margin-bottom: 2px;" th:text="${s.giaoVien != null ? s.giaoVien.ten : 'Chưa xếp GV'}"></div>
+                                    <div style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; display: inline-block; font-size: 11px; margin-bottom: 4px;" th:text="${s.monHoc}"></div>
+                                    <div th:if="${isFullMap[s.id]}" style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; display: inline-block; font-size: 10px; font-weight: bold; margin-left: 5px; animation: pulse 2s infinite;">
+                                        <i class="fa fa-users"></i> Lớp đã đầy
+                                    </div><br>
+                                    
+                                    <div style="font-size: 11px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 4px; margin-top: 2px;">
+                                        <i class="fa fa-clock-o"></i> 
+                                        <span th:text="${T(com.hutech.TrungTamTiengAnh.controller.ScheduleController).getStartTime(s.tietBatDau).toString() + ' - ' + T(com.hutech.TrungTamTiengAnh.controller.ScheduleController).getEndTime(s.tietKetThuc).toString()}"></span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal Chi Tiết -->
+    <div class="modal fade" id="scheduleModal" tabindex="-1" role="dialog" aria-labelledby="scheduleModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border-radius:12px; border:none; box-shadow:0 10px 30px rgba(0,0,0,0.1);">
+          <div class="modal-header" style="background:#f8fafc; border-radius:12px 12px 0 0; padding:20px;">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="scheduleModalLabel" style="font-weight:700;"><i class="fa fa-info-circle text-primary"></i> Chi tiết lớp học</h4>
+          </div>
+          <div class="modal-body" style="padding:25px;">
+            <div style="font-size:16px;">
+                <p><strong><i class="fa fa-book" style="color:#64748b; width:20px;"></i> Biên chế lớp:</strong> <span id="modalMonHoc" style="color:var(--ec-primary); font-weight:600;"></span></p>
+                <p><strong><i class="fa fa-user" style="color:#64748b; width:20px;"></i> Giáo viên:</strong> <span id="modalGiaoVien"></span></p>
+                <p><strong><i class="fa fa-calendar" style="color:#64748b; width:20px;"></i> Lịch học:</strong> <span id="modalThu"></span>, Buổi <span id="modalBuoi"></span></p>
+                <p><strong><i class="fa fa-clock-o" style="color:#64748b; width:20px;"></i> Tiết học:</strong> Từ tiết <span id="modalStart"></span> đến <span id="modalEnd"></span></p>
+            </div>
+            <div style="margin-top:20px; padding:15px; background:#f1f5f9; border-radius:8px; display:flex; gap:10px; align-items:center;">
+                <i class="fa fa-lightbulb-o text-warning" style="font-size:20px;"></i>
+                <small class="text-muted">Bạn có thể liên hệ trực tiếp với trung tâm nếu có nhu cầu chuyển lớp hoặc thắc mắc về lịch học này.</small>
+            </div>
+          </div>
+          </div>
+          <div class="modal-footer" style="border-top:none; padding:20px; display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius:8px; font-weight:600;">Đóng</button>
+            <a id="btnJoinClass" href="#" class="btn btn-primary" style="background: linear-gradient(135deg, #4f46e5, #6366f1); border:none; border-radius:8px; font-weight:600; padding: 10px 20px;">
+                <i class="fa fa-video-camera"></i> Bắt đầu lớp học
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script th:src="@{/js/jquery.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script>
+        function showDetails(monHoc, giaoVien, start, end, buoi, thu, id) {
+            document.getElementById('modalMonHoc').innerText = monHoc;
+            document.getElementById('modalGiaoVien').innerText = giaoVien;
+            document.getElementById('modalStart').innerText = start;
+            document.getElementById('modalEnd').innerText = end;
+            document.getElementById('modalBuoi').innerText = buoi;
+            document.getElementById('modalThu').innerText = thu;
+            
+            // Generate link to virtual room
+            document.getElementById('btnJoinClass').href = '/student/join/' + id;
+            
+            $('#scheduleModal').modal('show');
+        }
+    </script>
+</body>
+</html>
