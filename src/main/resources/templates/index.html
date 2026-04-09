@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EngCenter - Trung Tâm Tiếng Anh Hàng Đầu</title>
+    <meta name="description" content="EngCenter - Trung tâm tiếng Anh hàng đầu với đội ngũ giảng viên quốc tế, phương pháp học hiện đại và cam kết đầu ra rõ ràng.">
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/engcenter-design.css}">
+</head>
+
+<body class="ec-body" id="top" data-spy="scroll" data-target=".navbar-collapse" data-offset="50">
+
+    <!-- NAVBAR -->
+    <section class="navbar ec-navbar navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon icon-bar"></span>
+                    <span class="icon icon-bar"></span>
+                    <span class="icon icon-bar"></span>
+                </button>
+                <a href="/" class="navbar-brand">
+                    <span class="ec-brand-icon"><i class="fa fa-graduation-cap"></i></span>
+                    <span class="ec-brand-accent">EngCenter</span>
+                </a>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#features"><i class="fa fa-star"></i> Đặc Điểm</a></li>
+                    <li><a href="#why-us"><i class="fa fa-trophy"></i> Tại Sao Chọn</a></li>
+                    <li><a href="/login" class="ec-btn ec-btn-primary ec-btn-sm" style="margin-top: 6px; margin-left: 8px;">
+                        <i class="fa fa-sign-in"></i> Đăng Nhập
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- HERO SECTION -->
+    <section class="ec-hero">
+        <div class="ec-hero-shapes">
+            <div class="ec-hero-shape"></div>
+            <div class="ec-hero-shape"></div>
+            <div class="ec-hero-shape"></div>
+            <div class="ec-hero-shape"></div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1">
+                    <h1 class="ec-hero-title ec-animate-fadeInUp">Mở Khóa Tương Lai<br>Cùng <span style="text-decoration: underline; text-decoration-color: rgba(255,255,255,0.4); text-underline-offset: 8px;">EngCenter</span></h1>
+                    <p class="ec-hero-subtitle ec-animate-fadeInUp ec-animate-delay-2">Môi trường học tập tiêu chuẩn quốc tế, giảng viên tận tâm giúp bạn chinh phục đỉnh cao ngôn ngữ dễ dàng và hiệu quả hơn bao giờ hết.</p>
+                    <div class="ec-animate-fadeInUp ec-animate-delay-3" style="margin-top: 40px; display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+                        <a href="/register" class="ec-btn ec-btn-white ec-btn-lg">
+                            <i class="fa fa-rocket"></i> Bắt Đầu Ngay
+                        </a>
+                        <a href="#features" class="ec-btn ec-btn-outline ec-btn-lg">Tìm Hiểu Thêm</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="container" style="margin-top: -40px; position: relative; z-index: 10; padding-bottom: 60px;">
+        <div class="row">
+            <div class="col-md-4 col-sm-6" style="opacity:0; animation: ec-fadeInUp 0.6s ease-out 0.1s forwards;">
+                <div class="ec-feature-card">
+                    <div class="ec-feature-icon ec-feature-icon-primary">
+                        <i class="fa fa-users"></i>
+                    </div>
+                    <h3>Đội Ngũ Tinh Hoa</h3>
+                    <p>100% giáo viên bản ngữ và Việt Nam đạt chuẩn TESOL/CELTA với hơn 5 năm kinh nghiệm thực chiến.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6" style="opacity:0; animation: ec-fadeInUp 0.6s ease-out 0.25s forwards;">
+                <div class="ec-feature-card">
+                    <div class="ec-feature-icon ec-feature-icon-secondary">
+                        <i class="fa fa-lightbulb-o"></i>
+                    </div>
+                    <h3>Phương Pháp Hiện Đại</h3>
+                    <p>Ứng dụng công nghệ AI vào môi trường học kết hợp với lộ trình cá nhân hoá tối ưu cho từng học viên.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6" style="opacity:0; animation: ec-fadeInUp 0.6s ease-out 0.4s forwards;">
+                <div class="ec-feature-card">
+                    <div class="ec-feature-icon ec-feature-icon-accent">
+                        <i class="fa fa-shield"></i>
+                    </div>
+                    <h3>Cam Kết Đầu Ra</h3>
+                    <p>Hợp đồng đào tạo rõ ràng, cam kết đạt kết quả đầu ra bằng văn bản. Học lại miễn phí nếu chưa đạt.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHY US -->
+    <section id="why-us" style="padding: 80px 0; background: linear-gradient(135deg, rgba(79,70,229,0.03) 0%, rgba(6,182,212,0.03) 100%);">
+        <div class="container">
+            <div class="ec-section-title">
+                <h2>Tại Sao Chọn EngCenter?</h2>
+                <p>Hàng nghìn học viên đã tin tưởng và thành công cùng chúng tôi</p>
+                <div class="ec-title-line"></div>
+            </div>
+            <div class="row" style="margin-top: 20px;">
+                <div class="col-md-3 col-sm-6" style="margin-bottom: 30px;">
+                    <div style="text-align: center; padding: 30px 20px;">
+                        <div style="font-family: var(--ec-font-heading); font-size: 48px; font-weight: 800; background: var(--ec-gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px;">
+                            <span th:text="${totalRegistrations ?: '5000'}">0</span>+
+                        </div>
+                        <div style="color: var(--ec-text-light); font-weight: 500; font-size: 15px;">Lớp Học Đã Đăng Ký</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6" style="margin-bottom: 30px;">
+                    <div style="text-align: center; padding: 30px 20px;">
+                        <div style="font-family: var(--ec-font-heading); font-size: 48px; font-weight: 800; color: var(--ec-secondary); margin-bottom: 8px;">
+                            <span th:text="${totalStudents ?: '1000'}">0</span>+
+                        </div>
+                        <div style="color: var(--ec-text-light); font-weight: 500; font-size: 15px;">Học Viên Đang Theo Học</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6" style="margin-bottom: 30px;">
+                    <div style="text-align: center; padding: 30px 20px;">
+                        <div style="font-family: var(--ec-font-heading); font-size: 48px; font-weight: 800; color: var(--ec-accent); margin-bottom: 8px;">
+                            <span th:text="${totalTeachers ?: '50'}">0</span>+
+                        </div>
+                        <div style="color: var(--ec-text-light); font-weight: 500; font-size: 15px;">Giáo Viên Giỏi</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6" style="margin-bottom: 30px;">
+                    <div style="text-align: center; padding: 30px 20px;">
+                        <div style="font-family: var(--ec-font-heading); font-size: 48px; font-weight: 800; color: var(--ec-success); margin-bottom: 8px;">
+                            <span th:text="${totalClasses ?: '10'}">0</span>+
+                        </div>
+                        <div style="color: var(--ec-text-light); font-weight: 500; font-size: 15px;">Khóa Học Đa Dạng</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section style="padding: 80px 0;">
+        <div class="container">
+            <div class="ec-section-title">
+                <h2>Học Viên Nói Gì?</h2>
+                <p>Phản hồi chân thực từ các học viên đã theo học tại EngCenter</p>
+                <div class="ec-title-line"></div>
+            </div>
+            <div class="row" style="margin-top: 20px;">
+                <div class="col-md-4" style="margin-bottom: 30px; opacity:0; animation: ec-fadeInUp 0.6s ease-out 0.1s forwards;">
+                    <div class="ec-panel" style="padding: 35px 28px; height: 100%;">
+                        <div style="color: var(--ec-accent); font-size: 18px; margin-bottom: 16px;">
+                            <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                        </div>
+                        <p style="color: var(--ec-text-light); font-size: 15px; line-height: 1.8; font-style: italic; margin-bottom: 20px;">
+                            "Giáo viên rất tận tâm, phương pháp dạy dễ hiểu. Sau 6 tháng mình đã đạt IELTS 7.0 như mong muốn!"
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--ec-gradient-primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">N</div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--ec-text); font-size: 15px;">Nguyễn Minh Anh</div>
+                                <div style="color: var(--ec-text-muted); font-size: 13px;">IELTS 7.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" style="margin-bottom: 30px; opacity:0; animation: ec-fadeInUp 0.6s ease-out 0.25s forwards;">
+                    <div class="ec-panel" style="padding: 35px 28px; height: 100%;">
+                        <div style="color: var(--ec-accent); font-size: 18px; margin-bottom: 16px;">
+                            <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                        </div>
+                        <p style="color: var(--ec-text-light); font-size: 15px; line-height: 1.8; font-style: italic; margin-bottom: 20px;">
+                            "Lộ trình học rất rõ ràng, cá nhân hoá cho từng học viên. Mình cảm thấy tiến bộ rõ rệt từng tuần!"
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--ec-secondary), var(--ec-secondary-dark)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">T</div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--ec-text); font-size: 15px;">Trần Đức Huy</div>
+                                <div style="color: var(--ec-text-muted); font-size: 13px;">TOEIC 900</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" style="margin-bottom: 30px; opacity:0; animation: ec-fadeInUp 0.6s ease-out 0.4s forwards;">
+                    <div class="ec-panel" style="padding: 35px 28px; height: 100%;">
+                        <div style="color: var(--ec-accent); font-size: 18px; margin-bottom: 16px;">
+                            <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-o"></i>
+                        </div>
+                        <p style="color: var(--ec-text-light); font-size: 15px; line-height: 1.8; font-style: italic; margin-bottom: 20px;">
+                            "Môi trường học tập thân thiện, cơ sở vật chất hiện đại. Đây là sự lựa chọn tuyệt vời cho các bạn!"
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--ec-accent), var(--ec-accent-dark)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">L</div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--ec-text); font-size: 15px;">Lê Thị Thanh</div>
+                                <div style="color: var(--ec-text-muted); font-size: 13px;">IELTS 6.5</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section style="padding: 80px 0; background: var(--ec-gradient-primary); background-size: 200% 200%; animation: ec-gradient-shift 8s ease infinite; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.06\'%3E%3Cpath d=\'M20 20.5V18H0v-2h20v-2l3 3-3 3z\'/%3E%3C/g%3E%3C/svg%3E');"></div>
+        <div class="container text-center" style="position: relative; z-index: 1;">
+            <h2 style="font-family: var(--ec-font-heading); font-size: 36px; font-weight: 800; color: #fff; margin-bottom: 16px;">Sẵn Sàng Chinh Phục Tiếng Anh?</h2>
+            <p style="color: rgba(255,255,255,0.9); font-size: 18px; margin-bottom: 32px;">Đăng ký ngay hôm nay và nhận ưu đãi đặc biệt cho học viên mới</p>
+            <a href="/register" class="ec-btn ec-btn-white ec-btn-lg">
+                <i class="fa fa-pencil-square-o"></i> Đăng Ký Ngay
+            </a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="ec-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-5 col-sm-6">
+                    <h3>Về EngCenter</h3>
+                    <p style="margin-bottom: 20px;">Trung tâm tiếng Anh hàng đầu với sứ mệnh trang bị cho thế hệ trẻ Việt Nam hành trang ngôn ngữ vững chắc để tự tin hội nhập toàn cầu.</p>
+                    <div class="ec-footer-social">
+                        <a href="#" class="ec-social-fb"><i class="fa fa-facebook"></i></a>
+                        <a href="#" class="ec-social-ig"><i class="fa fa-instagram"></i></a>
+                        <a href="#" class="ec-social-yt"><i class="fa fa-youtube-play"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <h3>Liên Hệ</h3>
+                    <ul class="ec-footer-contact" style="padding-left: 0;">
+                        <li><i class="fa fa-phone"></i> <strong style="color: #fff;">0909 123 456</strong></li>
+                        <li><i class="fa fa-envelope-o"></i> contact@engcenter.com</li>
+                        <li><i class="fa fa-map-marker"></i> 123 Nguyễn Văn Cơ, Quận 10, TP.HCM</li>
+                    </ul>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <h3>Liên Kết Nhanh</h3>
+                    <ul class="ec-footer-links">
+                        <li><a href="#"><i class="fa fa-chevron-right"></i> Khóa Học Nổi Bật</a></li>
+                        <li><a href="#"><i class="fa fa-chevron-right"></i> Đội Ngũ Giáo Viên</a></li>
+                        <li><a href="#"><i class="fa fa-chevron-right"></i> Lịch Khai Giảng</a></li>
+                        <li><a href="#"><i class="fa fa-chevron-right"></i> Tin Tức &amp; Sự Kiện</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="ec-footer-bottom">
+                <p>&copy; 2026 EngCenter. Thiết kế với <i class="fa fa-heart"></i> vì mục tiêu giáo dục.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS files -->
+    <script th:src="@{/js/jquery.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+
+</body>
+
+</html>
