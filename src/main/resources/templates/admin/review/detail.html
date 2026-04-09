@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #e0e7ff;
+            --secondary: #9333ea;
+            --secondary-light: #f3e8ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-card: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+        }
+
+        .detail-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title-group h1 {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--text-main);
+            margin: 0;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .detail-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* SIDEBAR */
+        .sidebar-card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+            border: 1px solid #f1f5f9;
+            text-align: center;
+            position: sticky;
+            top: 20px;
+        }
+
+        .profile-img-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .profile-img {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #fff;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .badge-status {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: var(--success);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            border: 3px solid #fff;
+        }
+
+        .stat-banner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-box .value {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--text-main);
+            display: block;
+        }
+
+        .stat-box .label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* MAIN CONTENT */
+        .content-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .card-glass {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .card-icon.purple { background: var(--secondary-light); color: var(--secondary); }
+        .card-icon.orange { background: var(--warning-light); color: var(--warning); }
+        .card-icon.green { background: var(--success-light); color: var(--success); }
+
+        .card-title {
+            font-size: 19px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        /* CLASS INFO GRID */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            background: #f8fafc;
+            padding: 15px 20px;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .info-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* LISTS */
+        .item-row {
+            padding: 15px 0;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-row:last-child { border: none; }
+
+        .item-main {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .item-bullet {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .item-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* REVIEWS */
+        .review-card {
+            padding: 25px;
+            border-radius: 20px;
+            background: #fff;
+            border: 1px solid #f1f5f9;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(79, 70, 229, 0.08);
+            border-color: var(--primary-light);
+        }
+
+        .review-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .reviewer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #eef2f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .reviewer-name {
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .review-rating {
+            color: var(--warning);
+            font-size: 14px;
+        }
+
+        .review-text {
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .review-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: #4338ca; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3); }
+        
+        .btn-outline { background: transparent; border: 1.5px solid #e2e8f0; color: var(--text-muted); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-success:hover { background: #059669; }
+
+        /* MODAL */
+        .modal-blur {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: #fff;
+            width: 550px;
+            border-radius: 32px;
+            padding: 40px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.2);
+            animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.9) translateY(20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .modal-hdr {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .modal-body textarea {
+            width: 100%;
+            height: 180px;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            outline: none;
+            transition: 0.3s;
+            resize: none;
+        }
+
+        .modal-body textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 700;
+            margin-bottom: 25px;
+            transition: 0.3s;
+        }
+
+        .back-link:hover { color: var(--primary); transform: translateX(-5px); }
+    </style>
+
+    <div class="detail-header">
+        <div class="page-title-group">
+            <a href="/admin/review" class="back-link"><i class="fa fa-arrow-left"></i> Quay lại danh sách</a>
+            <h1 th:text="'Chi tiết Đánh giá: ' + ${lophoc.tenLop}"></h1>
+        </div>
+        <div class="header-actions">
+            <span class="tag green" style="background:#dcfce7; color:#15803d; padding:8px 16px; border-radius:12px; font-weight:700;">
+                <i class="fa fa-check-circle"></i> Đang hoạt động
+            </span>
+        </div>
+    </div>
+
+    <div class="detail-container">
+        <!-- Sidebar -->
+        <div class="sidebar-card">
+            <div class="profile-img-container">
+                <img th:src="${teacher != null && teacher.imagePath != null ? '/images/' + teacher.imagePath : 'https://cdn-icons-png.flaticon.com/512/194/194931.png'}" class="profile-img" alt="Teacher">
+                <div class="badge-status">Teacher</div>
+            </div>
+            
+            <h2 th:text="${teacher != null ? teacher.ten : 'Chưa phân công'}" style="margin: 0; font-weight: 900; color: var(--text-main);"></h2>
+            <p th:text="${teacher != null ? teacher.mucDo : 'N/A'}" style="color: var(--text-muted); font-weight: 600; margin-top: 5px;"></p>
+
+            <div class="stat-banner">
+                <div class="stat-box">
+                    <span class="value" th:text="${avgRating}">0</span>
+                    <span class="label">AVG Rating</span>
+                </div>
+                <div class="stat-box">
+                    <span class="value" th:text="${reviews.size()}">0</span>
+                    <span class="label">Total Reviews</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; text-align: left;">
+                <h4 style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; letter-spacing: 1px;">Lớp học khác của GV</h4>
+                <div th:each="oc : ${otherClasses}" class="item-row" style="padding: 10px 0;">
+                    <div class="item-main">
+                        <div class="item-bullet" style="background: var(--secondary);"></div>
+                        <span th:text="${oc.tenLop}" style="font-size: 13px; font-weight: 600;"></span>
+                    </div>
+                </div>
+                <p th:if="${otherClasses.isEmpty()}" style="font-size: 13px; color: #94a3b8; font-style: italic;">Không có lớp khác</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-grid">
+            
+            <!-- Class Info -->
+            <div class="card-glass">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fa fa-info-circle"></i></div>
+                    <h3 class="card-title">Thông tin Lớp học</h3>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Tên lớp</span>
+                        <span class="info-value" th:text="${lophoc.tenLop}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Học phí</span>
+                        <span class="info-value" th:text="${#numbers.formatDecimal(lophoc.hocPhi, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Sĩ số</span>
+                        <span class="info-value" th:text="${lophoc.daDangKy + ' / ' + lophoc.siSo}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Ngày học</span>
+                        <span class="info-value" th:text="${lophoc.ngayHoc}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedules & Quizzes -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div class="card-glass">
+                    <div class="card-header">
+                        <div class="card-icon purple"><i class="fa fa-calendar"></i></div>
+                        <h3 class="card-title">Lịch giảng dạy</h3>
+                    </div>
+                    <div th:each="s : ${schedules}" class="item-row">
+                        <div class="item-main">
+                            <span th:text="${s.thu}" class="item-name" style="background: var(--secondary-light); color: var(--secondary); padding: 4px 10px; border-radius: 8px;"></span>
+                            <span th:text="${s.tietBatDau + ' - ' + s.tietKetThuc}" class="item-meta"></span>
+                        </div>
+                        <span th:text="${s.buoi}" style="font-size: 12px; font-weight: 700; color: var(--text-muted);"></span>
+                    </div>
+                    <div th:if="${schedules.isEmpty()}" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">Chưa xếp lịch</div>
+                </div>
+
+                <div class="card-glass">
+                    <div class="card-header">
+                        <div class="card-icon orange"><i class="fa fa-file-text"></i></div>
+                        <h3 class="card-title">Đề kiểm tra</h3>
+                    </div>
+                    <div th:each="q : ${quizzes}" class="item-row">
+                        <div class="item-main">
+                            <div class="item-bullet" style="background: var(--warning);"></div>
+                            <span th:text="${q.title}" class="item-name"></span>
+                        </div>
+                    </div>
+                    <div th:if="${quizzes.isEmpty()}" style="padding: 20px; text-align: center; color: #94a3b8; font-style: italic;">Chưa có đề</div>
+                </div>
+            </div>
+
+            <!-- Reviews -->
+            <div class="card-glass">
+                <div class="card-header">
+                    <div class="card-icon orange" style="background: var(--warning-light); color: var(--warning);"><i class="fa fa-star"></i></div>
+                    <h3 class="card-title">Phản hồi của Học sinh</h3>
+                </div>
+                
+                <div th:if="${reviews.isEmpty()}" style="text-align: center; padding: 50px; color: #94a3b8;">
+                    <i class="fa fa-comments-o" style="font-size: 40px; margin-bottom: 15px; display: block; opacity: 0.5;"></i>
+                    Chưa có đánh giá nào cho giáo viên của lớp học này.
+                </div>
+
+                <div th:each="r : ${reviews}" class="review-card">
+                    <div class="review-top">
+                        <div class="reviewer-info">
+                            <div class="reviewer-avatar" th:text="${#strings.substring(r.tenSinhVien, 0, 1).toUpperCase()}"></div>
+                            <div>
+                                <div class="reviewer-name" th:text="${r.tenSinhVien}"></div>
+                                <div style="font-size: 11px; color: #94a3b8; font-weight: 600;">Học viên English Center</div>
+                            </div>
+                        </div>
+                        <div class="review-rating">
+                            <span th:each="i : ${#numbers.sequence(1, 5)}">
+                                <i th:class="${i <= r.rating ? 'fa fa-star' : 'fa fa-star-o'}"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="review-text" th:text="${r.comment}"></div>
+                    <div class="review-actions">
+                        <button class="btn-action btn-primary" 
+                                th:attr="data-id=${r.id}, data-student=${r.tenSinhVien}"
+                                onclick="openRespondModal(this)">
+                            <i class="fa fa-reply"></i> Phản hồi
+                        </button>
+                        <a th:if="${!r.approved}" 
+                           th:href="@{/admin/review/approve/{id}(id=${r.id}, classId=${lophoc.id})}" 
+                           class="btn-action btn-success">
+                            <i class="fa fa-check"></i> Duyệt
+                        </a>
+                        <span th:if="${r.approved}" style="color: var(--success); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 5px;">
+                            <i class="fa fa-check-circle"></i> Đã duyệt
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div id="respondModal" class="modal-blur" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-hdr">Phản hồi Học viên</div>
+            <p style="color: var(--text-muted); font-weight: 500;">Gửi phản hồi chính thức cho <span id="targetStudent" style="color: var(--primary); font-weight: 800;"></span></p>
+            
+            <form th:action="@{/admin/review/respond}" method="post" id="respondForm">
+                <input type="hidden" name="reviewId" id="modalReviewId">
+                <input type="hidden" name="classId" th:value="${lophoc.id}">
+                
+                <div class="modal-body">
+                    <textarea name="responseMsg" placeholder="Nhập lời nhắn của bạn đến học viên..." required></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 15px;">
+                    <button type="submit" class="btn-action btn-primary" style="flex: 1; height: 55px; border-radius: 18px; font-size: 16px;">
+                        <i class="fa fa-paper-plane"></i> Gửi ngay
+                    </button>
+                    <button type="button" class="btn-action btn-outline" style="flex: 0.4; height: 55px; border-radius: 18px; font-size: 16px;" onclick="closeModal()">
+                        Hủy
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function openRespondModal(btn) {
+            const id = btn.getAttribute('data-id');
+            const student = btn.getAttribute('data-student');
+            document.getElementById('modalReviewId').value = id;
+            document.getElementById('targetStudent').innerText = student;
+            document.getElementById('respondModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('respondModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('respondModal')) {
+                closeModal();
+            }
+        }
+    </script>
+</section>
+</html>

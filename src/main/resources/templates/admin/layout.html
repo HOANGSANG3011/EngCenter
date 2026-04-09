@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - EngCenter</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/engcenter-design.css}">
+</head>
+
+<body class="ec-body" id="top" data-spy="scroll" data-target=".navbar-collapse" data-offset="50">
+
+<!-- PRE LOADER -->
+<section class="preloader">
+    <div class="spinner">
+        <span class="spinner-rotate"></span>
+    </div>
+</section>
+
+<!-- NAVBAR -->
+<section class="navbar ec-navbar navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+            </button>
+
+            <a href="/admin/home" class="navbar-brand">
+                <span class="ec-brand-icon"><i class="fa fa-shield"></i></span>
+                <span class="ec-brand-accent">Admin Panel</span>
+            </a>
+        </div>
+
+        <!-- MENU -->
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+
+                <li><a href="/admin/home"><i class="fa fa-home"></i> Trang chủ</a></li>
+
+                <li><a href="/admin/lophoc"><i class="fa fa-building"></i> Lớp học</a></li>
+
+                <li><a href="/admin/dangky"><i class="fa fa-check-square-o"></i> Duyệt đăng ký</a></li>
+                
+                <li><a href="/admin/quiz/create"><i class="fa fa-question-circle"></i> Tạo bài kiểm tra</a></li>
+
+                <!-- Dropdown quản lý -->
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-cog"></i> Quản lý <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/admin/teacher-manage"><i class="fa fa-users" style="margin-right: 8px; color: var(--ec-primary);"></i> Danh sách giáo viên</a></li>
+                        <li><a href="/admin/schedule"><i class="fa fa-calendar" style="margin-right: 8px; color: var(--ec-secondary);"></i> Phân công lịch dạy</a></li>
+                        <li><a href="/admin/hocphi"><i class="fa fa-money" style="margin-right: 8px; color: var(--ec-success);"></i> Danh sách học phí</a></li>
+                        <li><a href="/admin/review"><i class="fa fa-star" style="margin-right: 8px; color: var(--ec-accent);"></i> Xác nhận đánh giá</a></li>
+                        <li><a href="/admin/notification/send"><i class="fa fa-paper-plane" style="margin-right: 8px; color: #f59e0b;"></i> Gửi thông báo</a></li>
+                    </ul>
+                </li>
+
+                <li style="margin-left: 10px;">
+                    <a href="/logout" class="ec-color-animate" style="border-radius: 8px; padding: 10px 15px; font-weight: bold; display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                        <i class="fa fa-sign-out"></i> Đăng xuất
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- CONTENT -->
+<div class="container ec-main-content">
+    <div th:replace="${content}"></div>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:src="@{/js/jquery.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/custom.js}"></script>
+<script th:src="@{/js/custom-effects.js}"></script>
+
+</body>
+</html>

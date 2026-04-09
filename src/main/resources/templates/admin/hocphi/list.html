@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #06B6D4;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --slate-50: #F8FAFC;
+            --slate-100: #F1F5F9;
+            --slate-600: #475569;
+            --slate-800: #1E293B;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 40px;
+            border-radius: 24px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(79, 70, 229, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-section::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            height: 100%;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .filter-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            border: 1px solid var(--slate-100);
+        }
+
+        .form-control-modern {
+            height: 48px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 10px 16px;
+            transition: all 0.3s;
+            background: var(--slate-50);
+        }
+
+        .form-control-modern:focus {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            outline: none;
+        }
+
+        .btn-modern {
+            height: 48px;
+            border-radius: 12px;
+            padding: 0 24px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary-modern {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary-modern:hover {
+            background: #4338CA;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-success-modern {
+            background: var(--success);
+            color: white;
+            border: none;
+        }
+
+        .btn-success-modern:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--slate-100);
+        }
+
+        .table-modern {
+            margin-bottom: 0;
+            width: 100%;
+        }
+
+        .table-modern th {
+            background: var(--slate-50);
+            padding: 18px 24px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--slate-600);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--slate-100);
+        }
+
+        .table-modern td {
+            padding: 18px 24px;
+            vertical-align: middle;
+            color: var(--slate-800);
+            border-bottom: 1px solid var(--slate-50);
+            font-size: 15px;
+        }
+
+        .badge-modern {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .badge-success-modern {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-danger-modern {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .badge-info-modern {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--secondary);
+        }
+
+        .chart-section {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid var(--slate-100);
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-edit {
+            color: var(--warning);
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-edit:hover {
+            color: #D97706;
+        }
+    </style>
+
+    <div class="header-section animate__animated animate__fadeIn">
+        <div class="row items-center">
+            <div class="col-md-6">
+                <h2 style="font-weight: 800; margin-bottom: 10px;">💰 Quản lý học phí</h2>
+                <p style="opacity: 0.9; font-size: 16px;">Theo dõi doanh thu và trạng thái thanh toán học phí</p>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Tổng doanh thu</div>
+                    <div class="stat-value" th:text="${#numbers.formatDecimal(tongTien,0,'COMMA',0,'POINT')} + ' ₫'"></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Tháng này</div>
+                    <div class="stat-value" th:text="${#numbers.formatDecimal(tienThang != null ? tienThang : 0,0,'COMMA',0,'POINT')} + ' ₫'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📊 CHART -->
+    <div class="chart-section animate__animated animate__fadeInUp">
+        <h4 style="font-weight: 800; color: var(--slate-800); margin-bottom: 25px;">📊 Doanh thu theo tháng</h4>
+        <div style="height: 350px;">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 🔍 FILTER -->
+    <div class="filter-panel animate__animated animate__fadeIn">
+        <form method="get">
+            <div class="row">
+                <div class="col-md-4">
+                    <select name="lopId" class="form-control-modern w-full">
+                        <option value="">-- Tất cả lớp --</option>
+                        <option th:each="l : ${lopHocList}"
+                                th:value="${l.id}"
+                                th:text="${l.tenLop}"
+                                th:selected="${param.lopId == l.id}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <input type="text" name="keyword"
+                           placeholder="Tìm tên học viên..."
+                           class="form-control-modern w-full"
+                           th:value="${param.keyword}">
+                </div>
+
+                <div class="col-md-4">
+                    <div class="flex gap-3">
+                        <button class="btn-modern btn-primary-modern">
+                            <i class="fa fa-filter"></i> Lọc dữ liệu
+                        </button>
+                        <a href="/admin/hocphi/export" class="btn-modern btn-success-modern" style="text-decoration:none;">
+                            <i class="fa fa-file-excel-o"></i> Xuất Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- 📋 TABLE -->
+    <div class="table-container animate__animated animate__fadeInUp">
+        <table class="table-modern">
+            <thead>
+            <tr>
+                <th>Học viên</th>
+                <th>Lớp học</th>
+                <th>Số tiền</th>
+                <th>Thanh toán</th>
+                <th>Phương thức</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="dk : ${list}">
+                <td>
+                    <div class="flex items-center gap-3">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--slate-100); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary); font-size: 12px;"
+                             th:text="${#strings.substring(dk.student.username,0,1).toUpperCase()}">
+                        </div>
+                        <span th:text="${dk.student.username}" style="font-weight: 600;"></span>
+                    </div>
+                </td>
+
+                <td th:text="${dk.lopHoc.tenLop}"></td>
+
+                <td style="color: var(--success); font-weight: 700;">
+                    <span th:text="${#numbers.formatDecimal(dk.hocPhi,0,'COMMA',0,'POINT')}"></span> ₫
+                </td>
+
+                <td>
+                    <span th:if="${dk.thanhToan == 'DA_DONG'}" class="badge-modern badge-success-modern">
+                        <i class="fa fa-check-circle"></i> Đã đóng
+                    </span>
+                    <span th:if="${dk.thanhToan != 'DA_DONG'}" class="badge-modern badge-danger-modern">
+                        <i class="fa fa-times-circle"></i> Chưa đóng
+                    </span>
+                </td>
+
+                <td>
+                    <span class="badge-modern badge-info-modern" th:text="${dk.phuongThuc}"></span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(list)}">
+                <td colspan="5" class="text-center py-10 text-muted">Không tìm thấy dữ liệu phù hợp</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 📊 CHART JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const revenueData = /*[[${thangData}]]*/ [];
+        /*]]>*/
+
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(79, 70, 229, 0.4)');
+        gradient.addColorStop(1, 'rgba(79, 70, 229, 0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"],
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: revenueData,
+                    borderColor: '#4F46E5',
+                    borderWidth: 3,
+                    fill: true,
+                    backgroundColor: gradient,
+                    tension: 0.4,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#4F46E5',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { color: '#64748b' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748b' }
+                    }
+                }
+            }
+        });
+    </script>
+</section>
+</html>

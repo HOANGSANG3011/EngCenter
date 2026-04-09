@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+    <style>
+        .form-container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            max-width: 700px;
+            margin: 40px auto;
+        }
+
+        .form-header {
+            margin-bottom: 35px;
+            text-align: center;
+        }
+
+        .form-header h3 {
+            font-weight: 800;
+            background: linear-gradient(135deg, #4F46E5, #06B6D4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-control-modern {
+            height: 52px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 12px 16px;
+            transition: all 0.3s;
+            background: #f8fafc;
+            width: 100%;
+        }
+
+        .form-control-modern:focus {
+            background: white;
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            outline: none;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #4F46E5, #4338CA);
+            color: white;
+            border: none;
+            height: 54px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 25px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2);
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .info-box {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            border-left: 4px solid #4F46E5;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .info-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .payment-box {
+            background: white;
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: #4F46E5;
+        }
+    </style>
+
+    <div class="form-container animate__animated animate__fadeIn">
+        <div class="form-header">
+            <h3>📝 Cập nhật thanh toán</h3>
+            <p class="text-muted">Quản lý và đối soát thông tin giao dịch của học viên</p>
+        </div>
+
+        <div class="info-box">
+            <div class="info-row">
+                <span class="info-label">Học viên:</span>
+                <span class="info-value" th:text="${dk.student.username}"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Lớp học:</span>
+                <span class="info-value" th:text="${dk.lopHoc.tenLop}"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Cần thanh toán:</span>
+                <span class="info-value" style="color: #059669;" 
+                      th:text="${#numbers.formatDecimal(dk.hocPhi,0,'COMMA',0,'POINT')} + ' ₫'"></span>
+            </div>
+        </div>
+
+        <form th:action="@{/admin/hocphi/save}" th:object="${dk}" method="post">
+            <input type="hidden" th:field="*{id}"/>
+
+            <div class="form-group mb-4">
+                <label>Họ tên người thanh toán</label>
+                <input type="text" class="form-control-modern" th:field="*{hoTenThanhToan}" placeholder="Tên in trên biên lai/thẻ...">
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-4">
+                        <label>Phương thức thanh toán</label>
+                        <select class="form-control-modern" th:field="*{phuongThuc}" onchange="toggleMethod(this.value)">
+                            <option value="TIEN_MAT">💵 Tiền mặt</option>
+                            <option value="CHUYEN_KHOAN">🏦 Chuyển khoản</option>
+                            <option value="QR">📱 Smart QR (Smart Pay)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-4">
+                        <label>Trạng thái</label>
+                        <select class="form-control-modern" th:field="*{thanhToan}">
+                            <option value="CHUA_DONG">⏳ Chưa đóng</option>
+                            <option value="DA_DONG">✅ Đã đóng</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bankBox" class="payment-box animate__animated animate__fadeIn" style="display:none; background: #f8fafc;">
+                <div class="text-left" style="font-size: 14px;">
+                    <p><b>🏦 Ngân hàng:</b> VIETCOMBANK</p>
+                    <p><b>🆔 Số tài khoản:</b> 1234567890</p>
+                    <p><b>📝 Nội dung:</b> <span style="color:#ef4444; font-weight: 800;">HP[[${dk.id}]]</span></p>
+                </div>
+            </div>
+
+            <div id="qrBox" class="payment-box animate__animated animate__fadeIn" style="display:none;">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=HP-Payment" alt="QR Code" style="border-radius: 12px; margin-bottom: 10px;"/>
+                <p style="color:#ef4444; font-weight: 700; font-size: 14px;">Mã định danh: HP[[${dk.id}]]</p>
+            </div>
+
+            <div class="form-group mb-4">
+                <label>Mã giao dịch / Ghi chú</label>
+                <input type="text" class="form-control-modern" th:field="*{maGiaoDich}" placeholder="Ví dụ: VCB12345098...">
+            </div>
+
+            <button type="submit" class="btn-save">
+                <i class="fa fa-save"></i> Lưu thông tin cập nhật
+            </button>
+
+            <a href="/admin/hocphi" class="back-link">
+                <i class="fa fa-arrow-left"></i> Quay lại danh sách
+            </a>
+        </form>
+    </div>
+
+    <script>
+        function toggleMethod(value){
+            document.getElementById("qrBox").style.display = (value === "QR") ? "block" : "none";
+            document.getElementById("bankBox").style.display = (value === "CHUYEN_KHOAN") ? "block" : "none";
+        }
+        
+        // Initialize state
+        window.onload = function() {
+            toggleMethod(document.querySelector('select[name="phuongThuc"]').value);
+        };
+    </script>
+</section>
+</html>

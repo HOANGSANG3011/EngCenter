@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+
+    <div class="ec-dashboard-banner">
+        <h1>Quản lý Giáo viên</h1>
+        <p>Xem danh sách giáo viên và thống kê hiệu suất giảng dạy</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 col-sm-6 ec-animate-fadeInUp" th:each="t, iter : ${teachers}" 
+             th:classappend="'ec-animate-delay-' + (${iter.index % 5} + 1)">
+            
+            <a th:href="@{/admin/teacher/{name}(name=${t.ten})}" style="text-decoration:none;">
+                <div class="ec-feature-card" style="padding: 30px;">
+                    <div class="ec-feature-icon" 
+                         th:classappend="${iter.index % 3 == 0 ? 'ec-feature-icon-primary' : (iter.index % 3 == 1 ? 'ec-feature-icon-secondary' : 'ec-feature-icon-accent')}">
+                        <img th:src="@{'/images/' + ${t.avatar}}" 
+                             style="width: 100%; height: 100%; border-radius: inherit; object-fit: cover;">
+                    </div>
+                    
+                    <h3 th:text="${t.ten}"></h3>
+                    <p style="color: var(--ec-primary); font-weight: 600; font-size: 14px; margin-bottom: 12px;">English Specialist</p>
+                    
+                    <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; font-size: 13px; color: var(--ec-text-light);">
+                        <span><i class="fa fa-book" style="margin-right: 4px;"></i> <span th:text="${t.classes}"></span> Lớp</span>
+                        <span>
+                            <i class="fa fa-star" style="color: var(--ec-accent); margin-right: 4px;"></i> 
+                            <span th:text="${t.rating}"></span>.0
+                        </span>
+                    </div>
+
+                    <div style="background: var(--ec-bg); padding: 8px 12px; border-radius: var(--ec-radius-sm); font-size: 12px; color: var(--ec-text-muted);">
+                        <i class="fa fa-calendar-check-o"></i> <span th:text="${t.lichHoc}"></span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div style="margin-top: 40px; text-align: center;">
+        <a href="/admin/teacher-manage/add" class="ec-btn ec-btn-primary ec-btn-lg">
+            <i class="fa fa-user-plus"></i> Thêm giáo viên mới
+        </a>
+    </div>
+
+</section>
+
+</html>

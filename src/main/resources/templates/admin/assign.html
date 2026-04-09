@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+
+    <style>
+        .panel-custom {
+            border-radius: 12px;
+            background: #fff;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            height: 42px;
+        }
+
+        .btn-save {
+            background: #4F46E5;
+            color: #fff;
+            border-radius: 8px;
+            padding: 10px 20px;
+            border: none;
+        }
+
+        .btn-save:hover {
+            background: #4338CA;
+        }
+    </style>
+
+    <div class="panel-custom">
+
+        <h3 style="margin-bottom:20px;font-weight:bold;">
+            Thêm lịch nhanh
+        </h3>
+
+        <form action="/admin/schedule/save" method="post">
+
+            <!-- ===== NGÀY ===== -->
+            <div class="form-group">
+                <label>Ngày</label>
+                <input type="date" name="ngay" id="ngay" class="form-control" required>
+            </div>
+
+            <!-- ===== THỨ (ẨN - AUTO) ===== -->
+            <input type="hidden" name="thu" id="thu">
+
+            <!-- ===== GIÁO VIÊN ===== -->
+            <div class="form-group">
+                <label>Giáo viên</label>
+                <select name="teacherId" id="teacherSelect" class="form-control" required>
+                    <option value="">-- Chọn giáo viên --</option>
+                    <option th:each="t : ${teachers}"
+                            th:value="${t.id}"
+                            th:data-mon="${t.mucDo}"
+                            th:text="${t.ten}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- ===== MÔN ===== -->
+            <div class="form-group">
+                <label>Môn học</label>
+                <input type="text" name="monHoc" id="monHoc" class="form-control" readonly placeholder="Sẽ tự động điền theo Giao viên...">
+            </div>
+
+            <!-- ===== BUỔI ===== -->
+            <div class="form-group">
+                <label>Buổi</label>
+                <select name="buoi" id="buoi" class="form-control">
+                    <option value="SANG">🌅 Sáng (1-6)</option>
+                    <option value="CHIEU">🌇 Chiều (7-12)</option>
+                    <option value="TOI">🌙 Tối (13-15)</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Từ tiết</label>
+                        <input type="number" name="tietBatDau" id="start" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Đến tiết</label>
+                        <input type="number" name="tietKetThuc" id="end" class="form-control" required>
+                    </div>
+                </div>
+            </div>
+
+            <div id="calc-result" style="margin-top: 10px; padding: 10px; background: #eef2ff; border-radius: 8px; color: #4f46e5; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <i class="fa fa-clock-o"></i> 
+                <span>Tổng cộng: <span id="total-minutes">0</span> phút (1 tiết = 45 phút)</span>
+            </div>
+
+            <br>
+
+            <button class="btn btn-save" style="width: 100%; justify-content: center; font-size: 16px;">
+                <i class="fa fa-save"></i> Lưu lịch phân công
+            </button>
+
+        </form>
+
+        <br>
+        <a href="/admin/schedule">
+            ← Quay lại thời khóa biểu
+        </a>
+
+    </div>
+
+    <!-- ================= JS ================= -->
+    <script>
+
+        // ===== AUTO THỨ =====
+        document.getElementById("ngay").addEventListener("change", function () {
+            const date = new Date(this.value);
+            const day = date.getDay();
+
+            const map = ["CN","T2","T3","T4","T5","T6","T7"];
+            document.getElementById("thu").value = map[day];
+        });
+
+        // ===== AUTO TIẾT =====
+        const buoi = document.getElementById("buoi");
+        const start = document.getElementById("start");
+        const end = document.getElementById("end");
+
+        function setTiet() {
+            if (buoi.value === "SANG") {
+                start.value = 1;
+                end.value = 3;
+            } else if (buoi.value === "CHIEU") {
+                start.value = 7;
+                end.value = 9;
+            } else {
+                start.value = 13;
+                end.value = 15;
+            }
+            calculateMinutes();
+        }
+
+        function calculateMinutes() {
+            const s = parseInt(start.value) || 0;
+            const e = parseInt(end.value) || 0;
+            if (e >= s && s > 0) {
+                const periods = (e - s) + 1;
+                document.getElementById("total-minutes").innerText = periods * 45;
+            } else {
+                document.getElementById("total-minutes").innerText = 0;
+            }
+        }
+
+        buoi.addEventListener("change", setTiet);
+        start.addEventListener("input", calculateMinutes);
+        end.addEventListener("input", calculateMinutes);
+        window.onload = setTiet;
+
+        // ===== AUTO MÔN HỌC =====
+        document.getElementById("teacherSelect").addEventListener("change", function() {
+            var selected = this.options[this.selectedIndex];
+            document.getElementById("monHoc").value = selected.getAttribute("data-mon") || "";
+        });
+
+        // ===== VALIDATE =====
+        document.querySelector("form").onsubmit = function() {
+            if (!document.getElementById("thu").value) {
+                alert("Vui lòng chọn ngày trước!");
+                return false;
+            }
+
+            if (parseInt(start.value) > parseInt(end.value)) {
+                alert("Tiết bắt đầu không được lớn hơn tiết kết thúc!");
+                return false;
+            }
+
+            return true;
+        };
+
+    </script>
+
+</section>
+</html>

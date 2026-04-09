@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+
+    <style>
+        .panel-custom{
+        border-radius:8px;
+        border-top:5px solid #3f51b5;
+        box-shadow:0 4px 10px rgba(0,0,0,0.05);
+        background:#fff;
+        padding:30px;
+        }
+
+        .form-control{
+        border-radius:4px;
+        box-shadow:none;
+        height:45px;
+        }
+
+        .form-control:focus{
+        border-color:#3f51b5;
+        box-shadow:none;
+        }
+
+        .btn-custom{
+        background-color:#3f51b5;
+        color:#fff;
+        border-radius:50px;
+        padding:10px 20px;
+        border:none;
+        transition:all .3s;
+        }
+
+        .btn-custom:hover{
+        background-color:#2e3a80;
+        color:#fff;
+        }
+
+        .action-links{
+        display:inline-block;
+        margin-left:15px;
+        }
+
+        .action-links a{
+        color:#757575;
+        font-weight:bold;
+        }
+
+        .action-links a:hover{
+        color:#353535;
+        }
+    </style>
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+
+            <div class="panel-custom">
+
+                <h3 style="margin-bottom:25px;color:#353535;font-weight:bold;">
+                    Thêm / Sửa lớp học
+                </h3>
+
+                <!-- Hiển thị lỗi nếu có -->
+                <div th:if="${error}" class="alert alert-danger" style="border-radius: 8px; font-weight: 500;">
+                    <i class="fa fa-exclamation-triangle"></i> <span th:text="${error}"></span>
+                </div>
+
+                <form th:action="@{/admin/lophoc/save}"
+                      th:object="${lophoc}"
+                      method="post"
+                      enctype="multipart/form-data">
+
+                    <input type="hidden" th:field="*{id}"/>
+                    <input type="hidden" th:field="*{hinhAnh}"/>
+
+                    <div class="form-group">
+                        <label>Tên lớp</label>
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{tenLop}"
+                               required>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label>Chọn giáo viên</label>
+                        <select class="form-control" name="teacherId" required>
+                            <option value="">-- Chọn giáo viên --</option>
+                            <option th:each="t : ${teachers}"
+                                    th:value="${t.id}"
+                                    th:selected="${lophoc.giaoVien != null and lophoc.giaoVien.id == t.id}"
+                                    th:text="${t.ten + ' - ' + t.mucDo}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Avatar giáo viên</label>
+                        <input type="file"
+                               name="fileImage"
+                               class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Lịch học (VD: Thứ 2, 4, 6 18:00 - 20:00)</label>
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{lichHoc}"
+                               placeholder="Ví dụ: Thứ 2, 4, 6 18:00"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ngày khai giảng</label>
+                        <input type="date"
+                               class="form-control"
+                               th:field="*{ngayHoc}"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sĩ số (Tối đa 25)</label>
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{siSo}"
+                               max="25"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Học phí</label>
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{hocPhi}"
+                               required>
+                    </div>
+
+                    <div style="margin-top:30px">
+
+                        <button type="submit"
+                                class="btn btn-custom">
+                            <i class="fa fa-save"></i>
+                            Lưu
+                        </button>
+
+                        <div class="action-links">
+                            <a href="/admin/lophoc">
+                                <i class="fa fa-arrow-left"></i>
+                                Quay lại danh sách
+                            </a>
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</section>
+</html>

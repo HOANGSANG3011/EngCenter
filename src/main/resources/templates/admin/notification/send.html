@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+    <style>
+        .panel-custom {
+            border-radius: 12px;
+            background: #fff;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header-section {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .header-section h3 {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .form-control-modern {
+            height: 45px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 10px 15px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .btn-modern {
+            background: var(--ec-primary);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .btn-modern:hover {
+            background: #4338CA;
+        }
+    </style>
+
+    <div class="panel-custom">
+        <div class="header-section">
+            <h3><i class="fa fa-paper-plane text-primary"></i> Gửi thông báo học sinh</h3>
+            <p class="text-muted">Nhắc nhở học phí hoặc cảnh báo vắng mặt</p>
+        </div>
+
+        <div th:if="${param.success}" class="alert alert-success">
+            Đã gửi thông báo thành công!
+        </div>
+
+        <form action="/admin/notification/send" method="post">
+            <label>Chọn học viên</label>
+            <select name="studentId" class="form-control-modern" required>
+                <option value="">-- Chọn học viên --</option>
+                <option th:each="s : ${students}" th:value="${s.id}" th:text="${s.username}"></option>
+            </select>
+
+            <label>Loại thông báo</label>
+            <select name="type" class="form-control-modern" required>
+                <option value="NHAC_NO">Nhắc nợ học phí</option>
+                <option value="VANG_MAT">Cảnh báo vắng mặt</option>
+                <option value="CHUNG">Thông báo chung</option>
+            </select>
+
+            <label>Nội dung chi tiết</label>
+            <textarea name="message" class="form-control-modern" style="height: 120px;" placeholder="Nhập nội dung thông báo muốn gửi đến học viên..." required></textarea>
+
+            <button type="submit" class="btn-modern">
+                <i class="fa fa-send"></i> Gửi thông báo ngay
+            </button>
+        </form>
+    </div>
+</section>
+
+</html>

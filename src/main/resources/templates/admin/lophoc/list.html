@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+    <style>
+        .panel-custom {
+            border-radius: 8px;
+            border-top: 5px solid #3f51b5;
+            /* Primary color for "Classes" related items in this theme */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            background: #fff;
+            padding: 30px;
+        }
+
+        .table>thead>tr>th {
+            border-bottom: 2px solid #3f51b5;
+            color: #353535;
+        }
+
+        .btn-custom-success {
+            background-color: #29ca8e;
+            color: #fff;
+            border-radius: 50px;
+            padding: 8px 20px;
+            border: none;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .btn-custom-success:hover {
+            background-color: #23ba81;
+            color: #fff;
+        }
+
+        .btn-custom-warning {
+            background-color: #f6c23e;
+            color: #fff;
+            border-radius: 50px;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-custom-warning:hover {
+            background-color: #dda116;
+            color: #fff;
+        }
+
+        .btn-custom-danger {
+            background-color: #e74a3b;
+            color: #fff;
+            border-radius: 50px;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-custom-danger:hover {
+            background-color: #c7291a;
+            color: #fff;
+        }
+
+        .action-links {
+            margin-top: 20px;
+        }
+
+        .action-links a {
+            color: #757575;
+            font-weight: bold;
+        }
+
+        .action-links a:hover {
+            color: #353535;
+        }
+    </style>
+
+    <div class="ec-panel ec-animate-fadeInUp">
+        <div class="ec-panel-header">
+            <h4><i class="fa fa-list-ul" style="color: var(--ec-primary); margin-right: 8px;"></i> Danh sách lớp học</h4>
+            <div style="display: flex; gap: 10px;">
+                <a href="/admin/teacher-manage" class="ec-btn ec-btn-accent ec-btn-sm">
+                    <i class="fa fa-users"></i> Quản lý GV
+                </a>
+                <a href="/admin/lophoc/add" class="ec-btn ec-btn-primary ec-btn-sm">
+                    <i class="fa fa-plus"></i> Thêm lớp
+                </a>
+                <a href="/admin/teacher-manage/add" class="ec-btn ec-btn-secondary ec-btn-sm">
+                    <i class="fa fa-user-plus"></i> Thêm giáo viên
+                </a>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 40px; background: var(--ec-bg); padding: 25px; border-radius: var(--ec-radius-lg); border: 1px solid var(--ec-border);">
+            <h5 style="text-align: center; margin-bottom: 24px; color: var(--ec-primary); font-weight: 700;">Biểu đồ thống kê lớp học theo giáo viên</h5>
+            <canvas id="teacherChart" height="100"></canvas>
+        </div>
+
+        <div class="table-responsive">
+            <table class="ec-table" id="classesTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên lớp</th>
+                        <th>Giáo viên</th>
+                        <th style="text-align: center;">Ảnh tiêu biểu</th>
+                        <th>Lịch học / Khai giảng</th>
+                        <th style="text-align: center;">Sĩ số</th>
+                        <th>Học phí</th>
+                        <th style="text-align: center;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="lh : ${list}">
+                        <td th:text="${lh.id}" style="color: var(--ec-text-muted);"></td>
+                        <td>
+                            <div style="font-weight: 700; color: var(--ec-text);" th:text="${lh.tenLop}"></div>
+                        </td>
+                        <td class="teacher-name">
+                            <a th:if="${lh.giaoVien != null}" 
+                               th:href="@{/admin/teacher/{name}(name=${lh.giaoVien.ten})}"
+                               style="color: var(--ec-primary); font-weight: 600; text-decoration: none;">
+                                <i class="fa fa-external-link" style="font-size: 11px; margin-right: 4px; opacity: 0.6;"></i>
+                                <span th:text="${lh.giaoVien.ten}"></span>
+                            </a>
+                            <span th:if="${lh.giaoVien == null}" class="text-muted">Chưa phân công</span>
+                        </td>
+
+                        <td style="text-align: center;">
+                            <img th:src="@{'/images/' + ${lh.hinhAnh}}"
+                                 width="50" height="50"
+                                 style="border-radius: 12px; object-fit: cover; border: 2px solid var(--ec-bg);">
+                        </td>
+
+                        <td>
+                            <div style="font-weight: 500; color: var(--ec-text);" th:text="${lh.lichHoc}"></div>
+                            <span style="font-size: 12px; color: var(--ec-text-light);">
+                                <i class="fa fa-calendar" style="margin-right: 4px;"></i>
+                                <span th:text="${#temporals.format(lh.ngayHoc,'dd/MM/yyyy')}"></span>
+                            </span>
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="ec-badge" th:classappend="${lh.daDangKy >= lh.siSo ? 'ec-badge-danger' : 'ec-badge-primary'}"
+                                  th:text="${lh.daDangKy + '/' + lh.siSo}"></span>
+                        </td>
+                        <td>
+                            <span style="font-weight: 600; color: var(--ec-success);" th:text="${#numbers.formatDecimal(lh.hocPhi, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                        </td>
+                        <td style="text-align: center;">
+                            <div style="display: flex; justify-content: center; gap: 8px;">
+                                <a th:href="@{/admin/lophoc/edit/{id}(id=${lh.id})}" 
+                                   class="ec-btn ec-btn-sm" style="background: var(--ec-primary-50); color: var(--ec-primary); padding: 6px 12px;"
+                                   title="Sửa">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+
+                                <a th:href="@{/admin/lophoc/delete/{id}(id=${lh.id})}" 
+                                   class="ec-btn ec-btn-sm" style="background: #FFF1F2; color: var(--ec-danger); padding: 6px 12px;"
+                                   onclick="return confirm('Bạn có chắc muốn xoá?')" title="Xoá">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var teacherElements = document.querySelectorAll('.teacher-name');
+                var teacherCounts = {};
+
+                teacherElements.forEach(function (el) {
+                    var name = el.innerText.trim();
+                    if (name && name !== 'Chưa phân công') {
+                        teacherCounts[name] = (teacherCounts[name] || 0) + 1;
+                    }
+                });
+
+                var labels = Object.keys(teacherCounts);
+                var data = Object.values(teacherCounts);
+
+                var ctx = document.getElementById('teacherChart').getContext('2d');
+                var chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Số lượng lớp học phụ trách',
+                            data: data,
+                            backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                            borderColor: 'rgba(79, 70, 229, 1)',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    font: { family: 'Inter' }
+                                },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            },
+                            x: {
+                                ticks: { font: { family: 'Inter' } },
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            });
+        </script>
+
+        <div style="margin-top: 30px;">
+            <a href="/admin/home" style="color: var(--ec-text-light); text-decoration: none; font-weight: 500; transition: var(--ec-transition-fast);">
+                <i class="fa fa-arrow-left"></i> Quay lại Dashboard
+            </a>
+        </div>
+    </div>
+
+</section>
+
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::section})}">
+
+<section>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="ec-dashboard-banner ec-animate-fadeInUp" style="padding: 40px; margin-bottom: 30px;">
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <div style="width: 70px; height: 70px; border-radius: 18px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; font-size: 30px; color: #fff;">
+                        <i class="fa fa-dashboard"></i>
+                    </div>
+                    <div>
+                        <h1 style="font-size: 32px; margin-bottom: 4px; color: #fff;">Bảng Điều Khiển Quản Trị</h1>
+                        <p style="font-size: 16px; opacity: 0.9; color: #fff; margin: 0;">Chào mừng, <span th:text="${session.user.username}">Admin</span>! Dưới đây là tình hình hoạt động của trung tâm.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+            <div class="ec-stat-card ec-stat-card-success">
+                <div class="ec-stat-icon ec-stat-icon-success">
+                    <i class="fa fa-building"></i>
+                </div>
+                <div class="ec-stat-info">
+                    <h4>Tổng lớp học</h4>
+                    <span class="ec-stat-value" th:text="${tongLop}">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+            <div class="ec-stat-card ec-stat-card-primary">
+                <div class="ec-stat-icon ec-stat-icon-primary">
+                    <i class="fa fa-user"></i>
+                </div>
+                <div class="ec-stat-info">
+                    <h4>Tổng học viên</h4>
+                    <span class="ec-stat-value" th:text="${tongHocVien}">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+            <div class="ec-stat-card ec-stat-card-accent">
+                <div class="ec-stat-icon ec-stat-icon-accent">
+                    <i class="fa fa-pencil-square-o"></i>
+                </div>
+                <div class="ec-stat-info">
+                    <h4>Tổng đăng ký</h4>
+                    <span class="ec-stat-value" th:text="${tongDangKy}">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+            <div class="ec-stat-card ec-stat-card-danger">
+                <div class="ec-stat-icon ec-stat-icon-danger">
+                    <i class="fa fa-users"></i>
+                </div>
+                <div class="ec-stat-info">
+                    <h4>Tổng giáo viên</h4>
+                    <span class="ec-stat-value" th:text="${tongGiaoVien}">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 10px;">
+
+        <!-- Biểu đồ cột -->
+        <div class="col-md-8" style="margin-bottom: 20px;">
+            <div class="ec-panel">
+                <div class="ec-panel-header">
+                    <h4><i class="fa fa-bar-chart" style="color: var(--ec-primary); margin-right: 8px;"></i> Đăng ký theo tháng</h4>
+                </div>
+                <div style="padding: 10px 0;">
+                    <canvas id="barChart" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ tròn -->
+        <div class="col-md-4" style="margin-bottom: 20px;">
+            <div class="ec-panel">
+                <div class="ec-panel-header">
+                    <h4><i class="fa fa-pie-chart" style="color: var(--ec-secondary); margin-right: 8px;"></i> Trạng thái</h4>
+                </div>
+                <div style="padding: 10px 0;">
+                    <canvas id="pieChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ giáo viên (Lớp học) -->
+        <div class="col-md-12" style="margin-bottom: 20px;">
+            <div class="ec-panel">
+                <div class="ec-panel-header">
+                    <h4><i class="fa fa-bar-chart" style="color: var(--ec-success); margin-right: 8px;"></i> Sĩ số lớp học theo từng Giáo viên</h4>
+                </div>
+                <div style="padding: 10px 0;">
+                    <canvas id="barChartTeacher" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Nút truy cập Hồ sơ Admin -->
+    <div class="row" style="margin-bottom: 30px;">
+        <div class="col-md-12">
+            <div class="ec-stat-card" style="border-left: 4px solid #10B981; background: linear-gradient(135deg, rgba(16,185,129,0.04), rgba(6,182,212,0.04));">
+                <div class="ec-stat-icon" style="background: linear-gradient(135deg, #10B981, #059669); color: #fff; box-shadow: 0 4px 14px rgba(16,185,129,0.35);">
+                    <i class="fa fa-user-circle"></i>
+                </div>
+                <div class="ec-stat-info">
+                    <h4 style="color: #065f46; font-weight: 800; margin-bottom: 4px;">Hồ sơ Admin &amp; Nhật ký Hoạt Động</h4>
+                    <p style="color: #6b7280; font-size: 13px; margin: 0;">Xem lịch sử đăng ký, duyệt học viên, bài kiểm tra trong hệ thống</p>
+                </div>
+                <div style="margin-left: auto; padding: 0 10px;">
+                    <a href="/admin/profile" class="btn" style="background: linear-gradient(135deg,#10B981,#059669); color: white; border-radius: 12px; padding: 12px 24px; font-weight: 700; border: none; box-shadow: 0 4px 12px rgba(16,185,129,0.3); text-decoration: none;">
+                        <i class="fa fa-history"></i> Mở Hồ sơ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const thang = [[${thangList}]];
+            const soLuong = [[${soLuongList}]];
+
+            new Chart(document.getElementById('barChart'), {
+                type: 'bar',
+                data: {
+                    labels: thang.map(t => "Tháng " + t),
+                    datasets: [{
+                        label: 'Số đăng ký',
+                        data: soLuong,
+                        backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                        hoverBackgroundColor: 'rgba(79, 70, 229, 1)',
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.04)' },
+                            ticks: { font: { family: 'Inter' } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Inter' } }
+                        }
+                    }
+                }
+            });
+
+            const monLabels = [[${monList}]];
+            const monCounts = [[${soLuongGiaoVienList}]];
+
+            new Chart(document.getElementById('pieChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: monLabels,
+                    datasets: [{
+                        data: monCounts,
+                        backgroundColor: ['#4F46E5', '#F59E0B', '#EF4444', '#10B981', '#3B82F6'],
+                        hoverBackgroundColor: ['#4338CA', '#D97706', '#DC2626', '#059669', '#2563EB'],
+                        borderWidth: 0,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    cutout: '72%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 16,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { family: 'Inter', size: 12 }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Giáo viên theo chuyên môn',
+                            font: { family: 'Inter', size: 14, weight: '600' }
+                        }
+                    }
+                }
+            });
+
+            const tenGvs = /*[[${tenGvs}]]*/ [];
+            const slLops = /*[[${slLops}]]*/ [];
+
+            if (tenGvs && tenGvs.length > 0) {
+                new Chart(document.getElementById('barChartTeacher'), {
+                    type: 'bar',
+                    data: {
+                        labels: tenGvs,
+                        datasets: [{
+                            label: 'Số lớp học',
+                            data: slLops,
+                            backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                            hoverBackgroundColor: 'rgba(16, 185, 129, 1)',
+                            borderRadius: 8,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { ticks: { font: {family: 'Inter', weight: '600'} } },
+                            x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.03)' }, ticks: { stepSize: 1, font: {family: 'Inter'} } }
+                        }
+                    }
+                });
+            }
+
+        });
+    </script>
+
+</section>
+
+</html>

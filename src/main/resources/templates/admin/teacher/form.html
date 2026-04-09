@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+
+    <style>
+        .panel-custom {
+            border-radius: 16px;
+            background: #ffffff;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            max-width: 600px;
+            margin: 20px auto;
+            border-top: 5px solid #4F46E5;
+        }
+
+        .panel-header {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .panel-header h3 {
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .panel-header p {
+            color: #64748b;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            height: 48px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+            padding: 10px 15px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .form-control:focus {
+            background: #ffffff;
+            border-color: #4F46E5;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .input-icon-wrapper {
+            position: relative;
+        }
+
+        .input-icon-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .input-icon-wrapper .form-control {
+            padding-left: 45px;
+        }
+
+        .btn-group-custom {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #4F46E5, #4338CA);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-weight: 600;
+            font-size: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(79, 70, 229, 0.3);
+            color: #ffffff;
+        }
+
+        .btn-back {
+            background: #f1f5f9;
+            color: #475569;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.2s;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-back:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+            text-decoration: none;
+        }
+    </style>
+
+    <div class="panel-custom">
+
+        <div class="panel-header">
+            <h3><i class="fa fa-user-circle-o" style="color: #4F46E5; margin-right: 8px;"></i>Thông tin giáo viên</h3>
+            <p th:text="${teacher.id == null ? 'Thêm giáo viên mới vào hệ thống' : 'Cập nhật thông tin giáo viên'}"></p>
+        </div>
+
+        <form th:action="@{/admin/teacher-manage/save}"
+              th:object="${teacher}"
+              method="post">
+
+            <input type="hidden" th:field="*{id}"/>
+            
+            <div th:if="${error}" class="alert alert-danger" style="background:#fee2e2; border-left: 4px solid #ef4444; color:#b91c1c; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                <i class="fa fa-exclamation-triangle" style="margin-right: 5px;"></i>
+                <span th:text="${error}"></span>
+            </div>
+
+            <!-- Tên -->
+            <div class="form-group mb-4">
+                <label>Tên giáo viên</label>
+                <div class="input-icon-wrapper">
+                    <i class="fa fa-user"></i>
+                    <input type="text" class="form-control" th:field="*{ten}" placeholder="Nhập họ và tên..." required>
+                </div>
+            </div>
+
+            <!-- Mức độ -->
+            <div class="form-group mb-4">
+                <label>Mức độ giảng dạy</label>
+                <div class="input-icon-wrapper">
+                    <i class="fa fa-graduation-cap"></i>
+                    <select class="form-control" th:field="*{mucDo}" id="mucDoSelect" required
+                            style="padding-left: 45px; appearance: auto;">
+                        <option value="">-- Chọn mức độ --</option>
+                        <option value="Beginner Teacher">Beginner Teacher</option>
+                        <option value="Elementary Teacher">Elementary Teacher</option>
+                        <option value="Intermediate Teacher">Intermediate Teacher</option>
+                        <option value="Advanced Teacher">Advanced Teacher</option>
+                        <option value="Expert Teacher">Expert Teacher</option>
+                    </select>
+                </div>
+
+                <!-- Mô tả auto -->
+                <div id="mucDoDescription"
+                     style="margin-top: 10px; padding: 12px 16px; border-radius: 10px;
+                     background: linear-gradient(135deg, #EEF2FF, #E0E7FF); color: #4338CA;
+                     font-size: 14px; line-height: 1.6; display: none; border-left: 4px solid #4F46E5;">
+                </div>
+            </div>
+
+            <!-- Button -->
+            <div class="btn-group-custom">
+                <a href="/admin/teacher-manage" class="btn-back">
+                    <i class="fa fa-arrow-left"></i> Quay lại
+                </a>
+                <button type="submit" class="btn-save">
+                    <i class="fa fa-save"></i> Lưu thông tin
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- SCRIPT AUTO MÔ TẢ -->
+    <script>
+        const mucDoSelect = document.getElementById("mucDoSelect");
+        const descriptionBox = document.getElementById("mucDoDescription");
+
+        const descriptions = {
+            "Beginner Teacher": "Dạy học viên mới bắt đầu<br>Ngữ pháp, từ vựng đơn giản",
+            "Elementary Teacher": "Dạy trình độ A1–A2<br>Giao tiếp cơ bản, phát âm",
+            "Intermediate Teacher": "Dạy trình độ B1–B2<br>Giao tiếp, phản xạ, kỹ năng tổng hợp",
+            "Advanced Teacher": "Dạy học viên khá/giỏi<br>Viết, thuyết trình, học thuật",
+            "Expert Teacher": "Dạy IELTS, TOEIC, luyện thi<br>Có nhiều kinh nghiệm hoặc chứng chỉ cao"
+        };
+
+        // Khi chọn mức độ
+        mucDoSelect.addEventListener("change", function () {
+            const selected = this.value;
+
+            if (descriptions[selected]) {
+                descriptionBox.innerHTML = descriptions[selected];
+                descriptionBox.style.display = "block";
+            } else {
+                descriptionBox.style.display = "none";
+            }
+        });
+
+        // Khi load trang (edit)
+        window.addEventListener("load", function () {
+            const selected = mucDoSelect.value;
+            if (descriptions[selected]) {
+                descriptionBox.innerHTML = descriptions[selected];
+                descriptionBox.style.display = "block";
+            }
+        });
+    </script>
+
+</section>
+</html>

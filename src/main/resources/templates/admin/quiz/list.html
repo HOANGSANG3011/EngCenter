@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+
+    <style>
+        .quiz-panel {
+            background: #fff;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .main-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, #8B5CF6, #6366F1);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-decoration: none !important;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-create:hover {
+            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+            transform: translateY(-3px);
+            color: #fff;
+        }
+
+        .quiz-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 15px;
+        }
+
+        .quiz-table th {
+            padding: 15px 20px;
+            color: #64748b;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 13px;
+        }
+
+        .quiz-row {
+            background: #f8fafc;
+            border-radius: 16px;
+            transition: all 0.2s;
+        }
+
+        .quiz-row:hover {
+            transform: scale(1.01);
+            background: #f1f5f9;
+        }
+
+        .quiz-row td {
+            padding: 20px;
+            vertical-align: middle;
+        }
+
+        .quiz-row td:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+        .quiz-row td:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .status-draft { background: #fee2e2; color: #ef4444; }
+        .status-confirmed { background: #dcfce7; color: #15803d; }
+
+        .btn-confirm {
+            background: #10B981;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-confirm:hover { background: #059669; }
+
+        .btn-delete {
+            background: #f1f5f9;
+            color: #64748b;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none !important;
+        }
+
+        .btn-delete:hover { background: #ef4444; color: #fff; }
+
+        .btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    </style>
+
+    <div class="quiz-panel">
+        <div class="header-section">
+            <h1 class="main-title">
+                <i class="fa fa-list-alt" style="color: #6366F1;"></i> Quản lý Bài kiểm tra
+            </h1>
+            <a href="/admin/quiz/create" class="btn-create">
+                <i class="fa fa-plus"></i> Thiết kế Đề thi mới
+            </a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(quizzes)}" style="text-align: center; padding: 50px; color: #94a3b8;">
+            <i class="fa fa-folder-open-o" style="font-size: 48px; margin-bottom: 15px;"></i>
+            <h3>Chưa có bài kiểm tra nào được tạo</h3>
+        </div>
+
+        <table th:if="${!#lists.isEmpty(quizzes)}" class="quiz-table">
+            <thead>
+                <tr>
+                    <th>Tiêu đề</th>
+                    <th>Giáo viên</th>
+                    <th style="text-align: center;">Số câu</th>
+                    <th style="text-align: center;">Ngày thi</th>
+                    <th style="text-align: center;">Trạng thái</th>
+                    <th style="text-align: center;">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="q : ${quizzes}" class="quiz-row">
+                    <td>
+                        <div style="font-weight: 800; color: #1e293b; font-size: 16px;" th:text="${q.title}"></div>
+                    </td>
+                    <td>
+                        <div th:text="${q.teacher != null ? q.teacher.ten : 'Chưa xếp'}" style="font-weight: 600; color: #4F46E5;"></div>
+                    </td>
+                    <td style="text-align: center;">
+                        <span style="font-weight: 700;" th:text="${q.questions.size()}">0</span>
+                    </td>
+                    <td style="text-align: center; color: #64748b;">
+                        <span th:text="${#temporals.format(q.testDate, 'dd/MM/yyyy HH:mm')}"></span>
+                    </td>
+                    <td style="text-align: center;">
+                        <span th:if="${!q.confirmed}" class="status-badge status-draft">BẢN NHÁP</span>
+                        <span th:if="${q.confirmed}" class="status-badge status-confirmed">ĐÃ XÁC NHẬN</span>
+                    </td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <!-- Form xác nhận -->
+                            <form th:if="${!q.confirmed}" th:action="@{/admin/quiz/confirm/{id}(id=${q.id})}" method="post">
+                                <button type="submit" class="btn-confirm">Xác nhận</button>
+                            </form>
+                            
+                            <!-- Nút xóa -->
+                            <a th:href="@{/admin/quiz/delete/{id}(id=${q.id})}" 
+                               class="btn-delete" 
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa bài thi này?')">
+                                Xóa
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</section>
+</html>

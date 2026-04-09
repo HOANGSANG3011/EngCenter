@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+
+    <style>
+        .panel-custom {
+            border-radius: 16px;
+            background: #ffffff;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border-top: 5px solid #4F46E5;
+        }
+
+        .schedule-box {
+            border-radius: 12px;
+            padding: 12px;
+            color: #fff;
+            margin-bottom: 8px;
+            font-size: 13px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .schedule-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: #fff;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 600;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .btn-add:hover {
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .week-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .btn-week {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            color: #4F46E5;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        .btn-week:hover {
+            background: #4F46E5;
+            color: #fff;
+            border-color: #4F46E5;
+            text-decoration: none;
+        }
+
+        .week-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .schedule-table th {
+            background: #f8fafc;
+            padding: 15px;
+            text-align: center;
+            color: #64748b;
+            font-weight: 700;
+            border-bottom: 2px solid #e2e8f0;
+            border-right: 1px solid #f1f5f9;
+        }
+        .schedule-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+            border-right: 1px solid #f1f5f9;
+            vertical-align: top;
+        }
+        .schedule-table td.session-col {
+            background: #f8fafc;
+            font-weight: 700;
+            color: #475569;
+            vertical-align: middle;
+            text-align: center;
+        }
+    </style>
+
+    <div class="panel-custom">
+
+        <!-- HEADER -->
+        <div class="week-nav">
+            <a th:href="@{/admin/schedule(weekOffset=${weekOffset - 1})}" class="btn-week">
+                <i class="fa fa-chevron-left"></i> Tuần trước
+            </a>
+
+            <div class="week-title">
+                <i class="fa fa-calendar" style="color: #4F46E5; margin-right: 8px;"></i>
+                Tuần (
+                <span th:text="${#temporals.format(startWeek,'dd/MM')}"></span>
+                -
+                <span th:text="${#temporals.format(endWeek,'dd/MM')}"></span>
+                )
+            </div>
+
+            <a th:href="@{/admin/schedule(weekOffset=${weekOffset + 1})}" class="btn-week">
+                Tuần sau <i class="fa fa-chevron-right"></i>
+            </a>
+        </div>
+
+        <!-- 🔥 NÚT THÊM LỊCH -->
+        <div style="margin-bottom:25px">
+            <a th:href="@{/admin/schedule/assign}" class="btn-add">
+                <i class="fa fa-plus-circle"></i> Thêm lịch dạy nhanh
+            </a>
+        </div>
+
+        <!-- TABLE -->
+        <table class="schedule-table">
+
+            <thead>
+            <tr>
+                <th style="width: 10%;">Buổi</th>
+                <th th:each="d : ${days}" th:text="${d}" style="width: 12.8%;"></th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <!-- ===== SÁNG ===== -->
+            <tr>
+                <td class="session-col">🌅 Sáng</td>
+
+                <td th:each="d : ${days}">
+                    <div th:each="s : ${schedules}"
+                         th:if="${s.thu == d and s.buoi == 'SANG'}"
+                         class="schedule-box"
+                         th:style="'background: linear-gradient(135deg, hsl(' + (${s.giaoVien != null ? s.giaoVien.id : 1} * 50 % 360) + ', 70%, 60%), hsl(' + (${s.giaoVien != null ? s.giaoVien.id : 1} * 50 % 360) + ', 60%, 50%)); position: relative;'">
+
+                        <!-- 🗑 DELETE BUTTON -->
+                        <a th:href="@{'/admin/schedule/delete/' + ${s.id}}" 
+                           onclick="return confirm('Bạn có muốn xóa lịch thời khóa biểu này không?');"
+                           style="position: absolute; top: 8px; right: 8px; color: rgba(255,255,255,0.7); transition: color 0.2s;">
+                            <i class="fa fa-trash"></i>
+                        </a>
+
+                        <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;" th:text="${s.giaoVien != null ? s.giaoVien.ten : 'Chưa xếp GV'}"></div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; display: inline-block; font-size: 11px; margin-bottom: 6px;" th:text="${s.monHoc}"></div><br>
+
+                        <div style="font-size: 11px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 6px; margin-top: 4px;">
+                            <i class="fa fa-clock-o"></i> 
+                            <span th:text="${T(com.hutech.TrungTamTiengAnh.controller.ScheduleController).getStartTime(s.tietBatDau).toString() + ' - ' + T(com.hutech.TrungTamTiengAnh.controller.ScheduleController).getEndTime(s.tietKetThuc).toString()}"></span>
+                            <br>
+                            (Tiết <span th:text="${s.tietBatDau}"></span> - <span th:text="${s.tietKetThuc}"></span>)
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- ===== CHIỀU ===== -->
+            <tr>
+                <td class="session-col">🌇 Chiều</td>
+
+                <td th:each="d : ${days}">
+                    <div th:each="s : ${schedules}"
+                         th:if="${s.thu == d and s.buoi == 'CHIEU'}"
+                         class="schedule-box"
+                         style="background: linear-gradient(135deg, #F59E0B, #D97706); position: relative;">
+
+                        <!-- 🗑 DELETE BUTTON -->
+                        <a th:href="@{'/admin/schedule/delete/' + ${s.id}}" 
+                           onclick="return confirm('Bạn có muốn xóa lịch thời khóa biểu này không?');"
+                           style="position: absolute; top: 8px; right: 8px; color: rgba(255,255,255,0.7); transition: color 0.2s;">
+                            <i class="fa fa-trash"></i>
+                        </a>
+
+                        <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;" th:text="${s.giaoVien != null ? s.giaoVien.ten : 'Chưa xếp GV'}"></div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; display: inline-block; font-size: 11px; margin-bottom: 6px;" th:text="${s.monHoc}"></div><br>
+
+                        <div style="font-size: 11px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 6px; margin-top: 4px;">
+                            <i class="fa fa-clock-o"></i> 
+                            <span th:text="${T(com.hutech.TrungTamTiengAnh.controller.ScheduleController).getStartTime(s.tietBatDau).toString() + ' - ' + T(com.hutech.TrungTamTiengAnh.controller.ScheduleController).getEndTime(s.tietKetThuc).toString()}"></span>
+                            <br>
+                            (Tiết <span th:text="${s.tietBatDau}"></span> - <span th:text="${s.tietKetThuc}"></span>)
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- ===== TỐI ===== -->
+            <tr>
+                <td class="session-col">🌙 Tối</td>
+
+                <td th:each="d : ${days}">
+                    <div th:each="s : ${schedules}"
+                         th:if="${s.thu == d and s.buoi == 'TOI'}"
+                         class="schedule-box"
+                         style="background: linear-gradient(135deg, #4F46E5, #3730A3); position: relative;">
+
+                        <!-- 🗑 DELETE BUTTON -->
+                        <a th:href="@{'/admin/schedule/delete/' + ${s.id}}" 
+                           onclick="return confirm('Bạn có muốn xóa lịch thời khóa biểu này không?');"
+                           style="position: absolute; top: 8px; right: 8px; color: rgba(255,255,255,0.7); transition: color 0.2s;">
+                            <i class="fa fa-trash"></i>
+                        </a>
+
+                        <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;" th:text="${s.giaoVien != null ? s.giaoVien.ten : 'Chưa xếp GV'}"></div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; display: inline-block; font-size: 11px; margin-bottom: 6px;" th:text="${s.monHoc}"></div><br>
+
+                        <div style="font-size: 11px; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 6px; margin-top: 4px;">
+                            <i class="fa fa-clock-o"></i> 
+                            <span th:text="${T(com.hutech.TrungTamTiengAnh.controller.ScheduleController).getStartTime(s.tietBatDau).toString() + ' - ' + T(com.hutech.TrungTamTiengAnh.controller.ScheduleController).getEndTime(s.tietKetThuc).toString()}"></span>
+                            <br>
+                            (Tiết <span th:text="${s.tietBatDau}"></span> - <span th:text="${s.tietKetThuc}"></span>)
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <style>
+        .schedule-box a:hover {
+            color: #fff !important;
+        }
+    </style>
+
+</section>
+</html>
+
+
+        </table>
+
+    </div>
+
+</section>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+    <style>
+        .panel-custom {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            max-width: 700px;
+            margin: 0 auto;
+            border: 1px solid #f1f5f9;
+        }
+
+        .form-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed #f1f5f9;
+        }
+
+        .form-header h3 {
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0 0 10px 0;
+            background: linear-gradient(135deg, #4f46e5, #06b6d4);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-header p {
+            color: #64748b;
+            margin: 0;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-control {
+            height: 48px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            padding: 10px 16px;
+            font-weight: 500;
+            color: #334155;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .form-control:focus {
+            background: #ffffff;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            outline: none;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2rem;
+            padding-right: 2.5rem;
+        }
+
+        .btn-modern {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+            border: none;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-primary-modern {
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .btn-primary-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3);
+            color: white;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: #4f46e5;
+        }
+    </style>
+
+    <div class="panel-custom animate__animated animate__zoomIn">
+
+        <div class="form-header">
+            <h3>Tạo Đăng Ký Mới</h3>
+            <p>Ghi danh học viên vào lớp học mong muốn</p>
+        </div>
+
+        <form th:action="@{/admin/dangky/save}" th:object="${dangky}" method="post">
+
+            <div class="form-group mb-4">
+                <label><i class="fa fa-user text-primary"></i> Học viên</label>
+                <select name="student.id" class="form-control" required>
+                    <option value="">-- Chọn học viên --</option>
+                    <option th:each="s : ${students}"
+                            th:value="${s.id}"
+                            th:text="${s.username}"
+                            th:selected="${dangky.student != null and dangky.student.id == s.id}"></option>
+                </select>
+            </div>
+
+            <div class="form-group mb-4">
+                <label><i class="fa fa-book text-primary"></i> Lớp học</label>
+                <select name="lopHoc.id" class="form-control" required>
+                    <option value="">-- Chọn lớp học --</option>
+                    <option th:each="l : ${lophocList}"
+                            th:value="${l.id}"
+                            th:text="${l.tenLop}"
+                            th:selected="${dangky.lopHoc != null and dangky.lopHoc.id == l.id}"></option>
+                </select>
+            </div>
+
+            <div class="form-group mb-4">
+                <label><i class="fa fa-shield text-primary"></i> Trạng thái</label>
+                <select th:field="*{trangThai}" class="form-control">
+                    <option value="CHO_DUYET">Chờ duyệt</option>
+                    <option value="DA_DUYET">Đã duyệt (Vào thẳng lớp)</option>
+                </select>
+            </div>
+
+            <button class="btn-modern btn-primary-modern" type="submit">
+                <i class="fa fa-save"></i> Lưu thông tin đăng ký
+            </button>
+
+        </form>
+
+        <div class="text-center">
+            <a href="/admin/dangky" class="back-link">
+                <i class="fa fa-arrow-left"></i> Quay lại danh sách
+            </a>
+        </div>
+
+    </div>
+
+</section>
+
+</html>

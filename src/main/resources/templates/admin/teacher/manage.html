@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+
+    <style>
+        .manage-panel {
+            border-radius: 16px;
+            background: #ffffff;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border-top: 5px solid #4F46E5;
+        }
+
+        .manage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .manage-header h3 {
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .manage-header .btn-group-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-nav {
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-nav-primary {
+            background: linear-gradient(135deg, #4F46E5, #4338CA);
+            color: #fff;
+        }
+        .btn-nav-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .btn-nav-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        .btn-nav-secondary:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+            text-decoration: none;
+        }
+
+        .teacher-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .teacher-table thead th {
+            background: #f8fafc;
+            padding: 14px 16px;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #64748b;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .teacher-table tbody td {
+            padding: 14px 16px;
+            font-size: 14px;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .teacher-table tbody tr {
+            transition: background 0.2s;
+        }
+        .teacher-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .teacher-name {
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .teacher-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #fff;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .teacher-subject {
+            display: inline-block;
+            background: #EEF2FF;
+            color: #4F46E5;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .btn-edit {
+            background: #EEF2FF;
+            color: #4F46E5;
+        }
+        .btn-edit:hover {
+            background: #E0E7FF;
+            color: #3730A3;
+            text-decoration: none;
+        }
+
+        .btn-delete {
+            background: #FFF1F2;
+            color: #EF4444;
+        }
+        .btn-delete:hover {
+            background: #FEE2E2;
+            color: #DC2626;
+            text-decoration: none;
+        }
+
+        .teacher-id {
+            background: #f1f5f9;
+            color: #94a3b8;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            color: #94a3b8;
+        }
+        .breadcrumb-nav a {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .breadcrumb-nav a:hover {
+            color: #4F46E5;
+        }
+        .breadcrumb-nav .separator {
+            color: #cbd5e1;
+        }
+        .breadcrumb-nav .current {
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #94a3b8;
+        }
+        .empty-state i {
+            font-size: 50px;
+            margin-bottom: 15px;
+            display: block;
+        }
+    </style>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-nav">
+        <a href="/admin/home"><i class="fa fa-home"></i> Dashboard</a>
+        <span class="separator">/</span>
+        <a href="/admin/lophoc">Lớp học</a>
+        <span class="separator">/</span>
+        <span class="current">Quản lý giáo viên</span>
+    </div>
+
+    <div class="manage-panel">
+
+        <div class="manage-header">
+            <h3><i class="fa fa-users" style="color: #4F46E5; margin-right: 8px;"></i> Quản lý giáo viên</h3>
+            <div class="btn-group-nav">
+                <a href="/admin/lophoc" class="btn-nav btn-nav-secondary">
+                    <i class="fa fa-list"></i> Lớp học
+                </a>
+                <a href="/admin/teacher-manage/add" class="btn-nav btn-nav-primary">
+                    <i class="fa fa-user-plus"></i> Thêm giáo viên
+                </a>
+            </div>
+        </div>
+
+        <!-- Thống kê nhanh -->
+        <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+            <div style="flex:1; background: linear-gradient(135deg, #EEF2FF, #E0E7FF); padding: 18px; border-radius: 12px;">
+                <div style="font-size: 28px; font-weight: 800; color: #4F46E5;" th:text="${#lists.size(teachers)}">0</div>
+                <div style="font-size: 13px; color: #64748b; font-weight: 500;">Tổng giáo viên</div>
+            </div>
+            <div style="flex:1; background: linear-gradient(135deg, #ECFDF5, #D1FAE5); padding: 18px; border-radius: 12px;">
+                <div style="font-size: 28px; font-weight: 800; color: #10B981;"><i class="fa fa-check-circle"></i></div>
+                <div style="font-size: 13px; color: #64748b; font-weight: 500;">Đang hoạt động</div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div th:if="${#lists.isEmpty(teachers)}" class="empty-state">
+            <i class="fa fa-user-times"></i>
+            <h4 style="color: #64748b; font-weight: 600;">Chưa có giáo viên nào</h4>
+            <p>Bấm <b>"Thêm giáo viên"</b> để bắt đầu thêm vào hệ thống.</p>
+        </div>
+
+        <table th:if="${!#lists.isEmpty(teachers)}" class="teacher-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Giáo viên</th>
+                <th>Môn dạy</th>
+                <th style="text-align: center;">Hành động</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="t, iter : ${teachers}">
+                <td><span class="teacher-id" th:text="'#' + ${t.id}"></span></td>
+                <td>
+                    <div class="teacher-name">
+                        <div class="teacher-avatar"
+                            th:style="'background: hsl(' + (${t.id} != null ? ${t.id} * 60 % 360 : 0) + ', 65%, 55%)'">
+                            <span th:text="${#strings.isEmpty(t.ten) ? 'T' : #strings.substring(t.ten, 0, 1)}"></span>
+                        </div>
+                        <span th:text="${#strings.isEmpty(t.ten) ? 'Chưa có tên' : t.ten}"></span>
+                    </div>
+                </td>
+                <td><span class="teacher-subject" th:text="${t.mucDo}"></span></td>
+                <td style="text-align: center;">
+                    <div style="display: flex; justify-content: center; gap: 8px;">
+                        <a th:href="@{'/admin/teacher-manage/edit/' + ${t.id}}" class="btn-action btn-edit">
+                            <i class="fa fa-pencil"></i> Sửa
+                        </a>
+                        <a th:href="@{'/admin/teacher-manage/delete/' + ${t.id}}"
+                           onclick="return confirm('Bạn có chắc muốn xóa giáo viên này?')"
+                           class="btn-action btn-delete">
+                            <i class="fa fa-trash"></i> Xóa
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Footer link -->
+        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between;">
+            <a href="/admin/lophoc" style="color: #64748b; font-weight: 600; font-size: 14px; text-decoration: none;">
+                <i class="fa fa-arrow-left" style="margin-right: 4px;"></i> Quay lại Lớp học
+            </a>
+            <a href="/admin/home" style="color: #94a3b8; font-size: 14px; text-decoration: none;">
+                <i class="fa fa-home" style="margin-right: 4px;"></i> Dashboard
+            </a>
+        </div>
+
+    </div>
+
+    <script th:if="${successAddedId != null}">
+        document.addEventListener("DOMContentLoaded", function() {
+            var addedId = "[[${successAddedId}]]";
+            
+            // Find the row containing this ID. The span has class teacher-id and text #id
+            var idSpans = document.querySelectorAll('.teacher-id');
+            idSpans.forEach(function(span) {
+                if(span.textContent === '#' + addedId) {
+                    var tr = span.closest('tr');
+                    var avatar = tr.querySelector('.teacher-avatar');
+                    var bgColor = avatar ? avatar.style.background : '#4F46E5';
+                    
+                    // Add glowing animation styling directly
+                    var style = document.createElement('style');
+                    style.innerHTML = `
+                        @keyframes highlightGlow {
+                            0% { box-shadow: 0 0 0 0 rgba(0,0,0,0); transform: scale(1); }
+                            30% { box-shadow: 0 0 20px 5px ` + bgColor + `; transform: scale(1.02); z-index: 10; position: relative;}
+                            100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); transform: scale(1); z-index: 10; position: relative;}
+                        }
+                        .glow-row td {
+                            transition: all 0.5s !important;
+                        }
+                        .glow-row {
+                            animation: highlightGlow 3s ease-out;
+                            background: #f8fafc;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    tr.classList.add('glow-row');
+                }
+            });
+        });
+    </script>
+
+</section>
+</html>

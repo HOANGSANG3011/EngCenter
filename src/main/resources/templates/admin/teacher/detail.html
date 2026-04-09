@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::section})">
+
+<section>
+
+    <div style="margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between;">
+        <a href="/admin/teacher" class="ec-btn" style="background: #fff; color: var(--ec-text-light); box-shadow: var(--ec-shadow-sm);">
+            <i class="fa fa-arrow-left"></i> Quay lại
+        </a>
+        <div class="ec-badge ec-badge-primary">Hồ sơ giáo viên</div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="ec-panel ec-animate-slideInLeft" style="text-align: center; padding: 40px 30px;">
+                <div style="width: 140px; height: 140px; margin: 0 auto 24px; border-radius: 50%; padding: 5px; background: var(--ec-gradient-primary);">
+                    <img th:if="${!classes.isEmpty()}" th:src="@{'/images/' + ${classes[0].hinhAnh}}" 
+                         style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid #fff;">
+                </div>
+                <h2 style="margin: 0 0 8px 0; font-weight: 800;" th:text="${teacherName}"></h2>
+                <p style="color: var(--ec-primary); font-weight: 600;">Chuyên gia Ngôn ngữ Anh</p>
+                
+                <div style="display: flex; justify-content: center; gap: 8px; margin: 20px 0; font-size: 20px; color: var(--ec-accent);">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star-half-o"></i>
+                </div>
+                
+                <div class="ec-stat-card ec-stat-card-primary" style="padding: 15px; margin-top: 20px; justify-content: center;">
+                    <div class="ec-stat-info" style="text-align: center;">
+                        <h4>Rating trung bình</h4>
+                        <div class="ec-stat-value" th:text="${#numbers.formatDecimal(avgRating,1,1)}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="ec-panel ec-animate-fadeInUp" style="margin-bottom: 30px;">
+                <div class="ec-panel-header">
+                    <h4><i class="fa fa-book" style="color: var(--ec-primary); margin-right: 8px;"></i> Các lớp đang phụ trách</h4>
+                </div>
+                <div class="table-responsive">
+                    <table class="ec-table">
+                        <thead>
+                            <tr>
+                                <th>Tên lớp</th>
+                                <th>Lịch học</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="c : ${classes}">
+                                <td style="font-weight: 600;" th:text="${c.tenLop}"></td>
+                                <td th:text="${#temporals.format(c.ngayHoc,'dd/MM/yyyy')}"></td>
+                                <td><span class="ec-badge ec-badge-success">Đang diễn ra</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="ec-panel ec-animate-fadeInUp ec-animate-delay-1">
+                <div class="ec-panel-header">
+                    <h4><i class="fa fa-comments" style="color: var(--ec-secondary); margin-right: 8px;"></i> Đánh giá từ sinh viên</h4>
+                </div>
+                
+                <div th:if="${reviews.isEmpty()}" style="text-align: center; padding: 40px; color: var(--ec-text-muted);">
+                    <i class="fa fa-comment-o" style="font-size: 40px; opacity: 0.3; margin-bottom: 15px; display: block;"></i>
+                    Chưa có đánh giá nào cho giáo viên này.
+                </div>
+
+                <div th:each="r : ${reviews}" class="ec-card-glass" style="padding: 20px; margin-bottom: 20px; border-left: 4px solid var(--ec-primary);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <h5 style="margin: 0; font-weight: 700; color: var(--ec-text);" th:text="${r.tenSinhVien}"></h5>
+                        <div style="color: var(--ec-accent); font-size: 14px;">
+                            <span th:each="i : ${#numbers.sequence(1, r.rating)}">
+                                <i class="fa fa-star"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <p style="margin: 0; color: var(--ec-text-light); line-height: 1.6;" th:text="${r.comment}"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+</html>
